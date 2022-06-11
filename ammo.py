@@ -7,6 +7,7 @@ Outline:
     Authenticate Spotify credentials to access https://favoritemusic.guru/.
     Jump to the 4th ol in the pulled data, which contains the relevant data.
     Store the nested il elements as a list, stripping irrelevant characters.
+    Check if a playlist exists for the past month, exiting the script if so.
     Send the contents of the list to the Spotify API to generate a playlist.
 
 References:
@@ -18,6 +19,7 @@ import requests
 from bs4 import BeautifulSoup
 import spotipy
 from spotipy import SpotifyOAuth
+from datetime import date
 
 
 def main():
@@ -48,6 +50,7 @@ def main():
     # Authenticate Spotify credentials to access https://favoritemusic.guru/.
     website_response = requests.get('https://favoritemusic.guru/', headers=headers, cookies=cookies)
     extracted_html = BeautifulSoup(website_response.content, 'html.parser')
+    # TODO: Check that the response code is 200 and handle other possible cases.
     list_of_ols = extracted_html.find_all('ol')
     past_month_data = 3     # NOTE: Could utilise other data in the future.
     list_of_songs = list_of_ols[past_month_data].contents
@@ -67,17 +70,39 @@ def main():
     client_secret = None    # NOTE: Currently hard coded via setx on my home PC.
     redirect_uri = None     # NOTE: Currently hard coded via setx on my home PC.
 
-    # Determine data for generating the Spotify data.
+    # Provide authentication to allow requesting Spotify data.
     token = SpotifyOAuth(scope=scope, username=username)
     spotify_data = spotipy.Spotify(auth_manager = token)
 
-    # TODO: Replace name input with the current month and year.
-    month = '<month>'
-    year = '<year>'
-    playlist_name = month + ' ' + year
+    # Determine the current date.
+    todays_date = date.today()
+    month = todays_date.month
+    year = todays_date.year
 
-    # Produce a description for the generated playlist.
-    playlist_description = 'My top 50 most played songs of ' + playlist_name + '. Auto-generated with A.M.M.O. Visit https://github.com/JayMassey98 for more information.'
+    # Use the above to calculate the playlist's start date and name.
+    month -= 1
+    playlist_date = todays_date.replace(month=month)
+    if not month:
+        year -= 1
+        playlist_date = todays_date.replace(month=12)
+        playlist_date = todays_date.replace(year=year)
+    playlist_name = playlist_date.strftime('%b %Y')
+
+    # Extract the user's existing playlists into a list.
+    dictionary_of_playlist_data = spotify_data.current_user_playlists().items()
+    list_of_users_playlists = list(dictionary_of_playlist_data)[1][1]
+    playlists_total = len(list_of_users_playlists)
+    playlists_left = playlists_total
+
+    # Make sure the monthly playlist does not already exist.
+    while playlists_left:
+        current_playlist = playlists_total - playlists_left
+        if playlist_name == list_of_users_playlists[current_playlist]['name']:
+            sys.exit('A playlist called ' + playlist_name + ' already exists! Aborting script.')
+        playlists_left -= 1
+     
+    # Auto-generate the description of the playlist.
+    playlist_description = 'My top 50 most played songs of ' + playlist_date.strftime('%B %Y') + '. Auto-generated with A.M.M.O. Visit https://github.com/JayMassey98 for more information.'
     spotify_data.user_playlist_create(user=username,name=playlist_name,public=True,description=playlist_description)
 
     # Continue looping until all songs have been appended.
