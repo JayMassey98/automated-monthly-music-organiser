@@ -16,6 +16,8 @@ References:
 import sys
 import requests
 from bs4 import BeautifulSoup
+import spotipy
+from spotipy import SpotifyOAuth
 
 
 def main():
@@ -54,7 +56,42 @@ def main():
     list_of_songs = [song.text.replace('—', '') for song in list_of_songs]
     list_of_songs = [song.replace('\xa0', '') for song in list_of_songs]
 
-    # TODO: Add Spotify API calls in order to generate Spotify playlists.
+    # TODO: Convert the following into suppliable arguments.
+    scope = 'playlist-modify-public'
+    username = '21js3bu3h7ixjemm7ypamzlga'
+    client_id = None        # NOTE: Currently hard coded via setx on my home PC.
+    client_secret = None    # NOTE: Currently hard coded via setx on my home PC.
+    redirect_uri = None     # NOTE: Currently hard coded via setx on my home PC.
+
+    # Determine data for generating the Spotify data.
+    token = SpotifyOAuth(scope=scope, username=username)
+    spotify_data = spotipy.Spotify(auth_manager = token)
+
+    # TODO: Replace name input with the current month and year.
+    playlist_name = input('Enter a playlist name: ')
+    month = '<month>'
+    year = '<year>'
+
+    # Produce a description for the generated playlist.
+    playlist_description = 'My top 50 most played songs of ' + month + ' ' + year + '. Auto-generated with A.M.M.O. Visit https://github.com/JayMassey98 for more information.'
+    spotify_data.user_playlist_create(user=username,name=playlist_name,public=True,description=playlist_description)
+
+    # TODO: Replace manual inputting of songs with the list pulled from favoritemusic.guru.
+    user_input = input('Select a song to add: ')
+    list_of_songs = []
+
+    # Continue looping until the user decides to stop.
+    while user_input != 'stop':
+        result = spotify_data.search(q=user_input)
+        list_of_songs.append(result['tracks']['items'][0]['uri'])
+        user_input = input('Select a song to add: ')
+
+    # Get the generated playlist.
+    playlist = spotify_data.user_playlists(user=username)['items'][0]['id']
+
+    # Add the list of songs.
+    if len(list_of_songs): # Prevents a null list error.
+        spotify_data.user_playlist_add_tracks(user=username,playlist_id=playlist,tracks=list_of_songs)
 
 
 # Only runs if called directly.
