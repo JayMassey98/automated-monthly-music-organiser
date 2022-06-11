@@ -52,6 +52,10 @@ def main():
     past_month_data = 3     # NOTE: Could utilise other data in the future.
     list_of_songs = list_of_ols[past_month_data].contents
 
+    # Failsafe variables just in-case 50 songs have not been supplied.
+    songs_total = len(list_of_songs)
+    songs_left = songs_total
+
     # Strip irrelevant characters so that the data can be sent to Spotify.
     list_of_songs = [song.text.replace('—', '') for song in list_of_songs]
     list_of_songs = [song.replace('\xa0', '') for song in list_of_songs]
@@ -68,23 +72,20 @@ def main():
     spotify_data = spotipy.Spotify(auth_manager = token)
 
     # TODO: Replace name input with the current month and year.
-    playlist_name = input('Enter a playlist name: ')
     month = '<month>'
     year = '<year>'
+    playlist_name = month + ' ' + year
 
     # Produce a description for the generated playlist.
-    playlist_description = 'My top 50 most played songs of ' + month + ' ' + year + '. Auto-generated with A.M.M.O. Visit https://github.com/JayMassey98 for more information.'
+    playlist_description = 'My top 50 most played songs of ' + playlist_name + '. Auto-generated with A.M.M.O. Visit https://github.com/JayMassey98 for more information.'
     spotify_data.user_playlist_create(user=username,name=playlist_name,public=True,description=playlist_description)
 
-    # TODO: Replace manual inputting of songs with the list pulled from favoritemusic.guru.
-    user_input = input('Select a song to add: ')
-    list_of_songs = []
-
-    # Continue looping until the user decides to stop.
-    while user_input != 'stop':
-        result = spotify_data.search(q=user_input)
-        list_of_songs.append(result['tracks']['items'][0]['uri'])
-        user_input = input('Select a song to add: ')
+    # Continue looping until all songs have been appended.
+    while songs_left:
+        current_song = songs_total - songs_left
+        result = spotify_data.search(q=list_of_songs[current_song])
+        list_of_songs[current_song] = result['tracks']['items'][0]['uri']
+        songs_left -= 1;
 
     # Get the generated playlist.
     playlist = spotify_data.user_playlists(user=username)['items'][0]['id']
