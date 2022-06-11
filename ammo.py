@@ -1,14 +1,16 @@
 """Generate a Spotify playlist containing your top 50 songs of the past month.
 
 Usage:
-    python ammo.py <Client ID> <Client Secret> <Redirect URI>
+    python ammo.py <Client ID> <Client Secret> <Redirect URI> <username> <scope>
+    TODO: Arguments have not yet been created; these are currently hard-coded.
 
 Outline:
-    Authenticate Spotify credentials to access https://favoritemusic.guru/.
-    Jump to the 4th ol in the pulled data, which contains the relevant data.
-    Store the nested il elements as a list, stripping irrelevant characters.
+    Authenticate the user's Spotify credentials to allow the script to work.
     Check if a playlist exists for the past month, exiting the script if so.
-    Send the contents of the list to the Spotify API to generate a playlist.
+    Use the user's credentials to pull HTML data containing their top songs.
+    Jump to the 4th ol in the parsed HTML, which contains the relevant data.
+    Store the nested il elements as a list, stripping irrelevant characters.
+    Send the user's list of songs to the Spotify API to generate a playlist.
 
 References:
     See https://developer.spotify.com/documentation/web-api/ for API info.
@@ -22,8 +24,18 @@ from spotipy import SpotifyOAuth
 from datetime import date
 
 
-def main():
-    # TODO: Split main() into separate functions, then add Docstring comments.
+def request_most_played_songs():
+    """Use the user's credentials to pull HTML data containing their top songs.
+
+    Jump to the 4th ol in the parsed HTML, which contains the relevant data.
+    Store the nested il elements as a list, stripping irrelevant characters.
+    
+    Returns:
+        The user's top 50 (or less) most listened to songs of the past month.
+
+    Raises:
+        Exception: If the URL containing the list of songs cannot be reached.
+    """
 
     # Headers taken from Chrome's inspect element of favoritemusic.guru.
     headers = {
@@ -47,28 +59,41 @@ def main():
         'spotifyTopsId': 'fdf56acc-b7d0-4cf2-8753-66bfc9f1d7a0',
     }
 
-    # Authenticate Spotify credentials to access https://favoritemusic.guru/.
-    website_response = requests.get('https://favoritemusic.guru/', headers=headers, cookies=cookies)
+    # NOTE: Website could be changed in the future.
+    url = 'https://favoritemusic.guru/'
+
+    # Authenticate the user's Spotify credentials to allow the script to work.
+    website_response = requests.get(url, headers=headers, cookies=cookies)
+    if website_response.status_code != 200:
+        sys.exit('Failed to reach ' + url + "! Script aborted.")
+
+    # Strip irrelevant data so that the list of songs can be sent to Spotify.
     extracted_html = BeautifulSoup(website_response.content, 'html.parser')
-    # TODO: Check that the response code is 200 and handle other possible cases.
     list_of_ols = extracted_html.find_all('ol')
     past_month_data = 3     # NOTE: Could utilise other data in the future.
     list_of_songs = list_of_ols[past_month_data].contents
-
-    # Failsafe variables just in-case 50 songs have not been supplied.
-    songs_total = len(list_of_songs)
-    songs_left = songs_total
-
-    # Strip irrelevant characters so that the data can be sent to Spotify.
     list_of_songs = [song.text.replace('—', '') for song in list_of_songs]
     list_of_songs = [song.replace('\xa0', '') for song in list_of_songs]
+
+    return list_of_songs
+
+
+def main():
+    """Authenticate the user's Spotify credentials to allow the script to work.
+
+    Check if a playlist exists for the past month, exiting the script if so.
+    Send the user's list of songs to the Spotify API to generate a playlist.
+
+    Raises:
+        Exception: If the user already has a playlist called <month> <year>.
+    """
 
     # TODO: Convert the following into suppliable arguments.
     scope = 'playlist-modify-public'
     username = '21js3bu3h7ixjemm7ypamzlga'
-    client_id = None        # NOTE: Currently hard coded via setx on my home PC.
-    client_secret = None    # NOTE: Currently hard coded via setx on my home PC.
-    redirect_uri = None     # NOTE: Currently hard coded via setx on my home PC.
+    client_id = None        # NOTE: Currently hard-coded via setx on my home PC.
+    client_secret = None    # NOTE: Currently hard-coded via setx on my home PC.
+    redirect_uri = None     # NOTE: Currently hard-coded via setx on my home PC.
 
     # Provide authentication to allow requesting Spotify data.
     token = SpotifyOAuth(scope=scope, username=username)
@@ -80,12 +105,10 @@ def main():
     year = todays_date.year
 
     # Use the above to calculate the playlist's start date and name.
-    month -= 1
-    playlist_date = todays_date.replace(month=month)
+    playlist_date = todays_date.replace(month=month-1)
     if not month:
-        year -= 1
         playlist_date = todays_date.replace(month=12)
-        playlist_date = todays_date.replace(year=year)
+        playlist_date = todays_date.replace(year=year-1)
     playlist_name = playlist_date.strftime('%b %Y')
 
     # Extract the user's existing playlists into a list.
@@ -100,6 +123,11 @@ def main():
         if playlist_name == list_of_users_playlists[current_playlist]['name']:
             sys.exit('A playlist called ' + playlist_name + ' already exists! Aborting script.')
         playlists_left -= 1
+
+    # Number of songs saved in-case less than 50 songs are supplied.
+    list_of_songs = request_most_played_songs()
+    songs_total = len(list_of_songs)
+    songs_left = songs_total
      
     # Auto-generate the description of the playlist.
     playlist_description = 'My top 50 most played songs of ' + playlist_date.strftime('%B %Y') + '. Auto-generated with A.M.M.O. Visit https://github.com/JayMassey98 for more information.'
