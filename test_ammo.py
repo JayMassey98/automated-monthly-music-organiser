@@ -24,6 +24,27 @@ from spotipy import SpotifyOAuth
 
 
 # -----------------
+# Spotify API Mocks
+# -----------------
+
+
+# Creates a mock SpotifyOAuth class that returns a mock Spotify client.
+class mock_SpotifyOAuth(SpotifyOAuth):
+    def __init__(self, *args, **kwargs):
+        self.client = mock_SpotifyClient()
+        self._session = None
+
+
+# Creates a mock Spotify client containing various playlist functions.
+class mock_SpotifyClient():
+    def user(self):
+        return 'mock_user'
+    def current_user_playlists(self):
+        return {'items': [{'name': 'existing_playlist'}]}
+
+
+
+# -----------------
 # test_abort_script
 # -----------------
 
@@ -85,3 +106,31 @@ def test_generate_playlist_name_no_abbreviation(month=2):
     expected_playlist_name = mock_date.replace(month=month-1).strftime('%B %Y')
     generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_length = 'long')
     assert generated_playlist_name == expected_playlist_name
+
+
+
+# -----------------------------------
+# test_assert_playlist_does_not_exist
+# -----------------------------------
+
+
+# Tests the function raises an exception when no spotify data is supplied.
+def test_assert_playlist_does_not_exist_no_data():
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        assert_playlist_does_not_exist(playlist_name='existing_playlist')
+    assert pytest_wrapped_e.value.code == 'No Spotify data supplied! Script aborted.\n\n'
+
+
+# Tests the function raises an exception when the playlist already exists.
+def test_assert_playlist_does_not_exist_is_false():
+    spotify_data = mock_SpotifyOAuth().client
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        assert_playlist_does_not_exist(playlist_name='existing_playlist', spotify_data=spotify_data)
+    assert pytest_wrapped_e.value.code == 'A playlist called existing_playlist already exists! Script aborted.\n\n'
+
+
+# Tests the function does not raise an exception when the playlist does not already exist.
+def test_assert_playlist_does_not_exist_is_true():
+    spotify_data = mock_SpotifyOAuth().client
+    assert_playlist_does_not_exist(playlist_name='new_playlist', spotify_data=spotify_data)
+    assert True
