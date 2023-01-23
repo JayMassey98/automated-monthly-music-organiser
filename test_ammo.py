@@ -40,3 +40,48 @@ def test_abort_script_custom_error_message():
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         abort_script("Custom error message.")
     assert pytest_wrapped_e.value.code == 'Custom error message. Script aborted.\n\n'
+
+
+
+# ---------------------------
+# test_generate_playlist_name
+# ---------------------------
+
+
+# Tests generating the playlist name for all months in the year.
+def test_generate_playlist_name_for_all_months():
+
+    # Generate a playlist date first.
+    generate_playlist_date()
+
+    # Tests once for each month in the year.
+    test_generate_playlist_name_for_only_january()
+    for month in range(1, 12):
+        test_generate_playlist_name_when_not_january(month + 1)
+
+
+# Tests generating the playlist name when the current month is January.
+def test_generate_playlist_name_for_only_january():
+    mock_date = date(2023, 1, 1)
+    mock_playlist_date = mock_date.replace(year=2022, month=12)
+    expected_playlist_name = mock_date.replace(year=2022, month=12).strftime('%b %Y')
+    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_length = 'short')
+    assert generated_playlist_name == expected_playlist_name
+
+
+# Tests generating the playlist name when the current month is not January.
+def test_generate_playlist_name_when_not_january(month=2):
+    mock_date = date(2023, month, 1)
+    mock_playlist_date = mock_date.replace(month=month-1)
+    expected_playlist_name = mock_date.replace(month=month-1).strftime('%b %Y')
+    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_length = 'short')
+    assert generated_playlist_name == expected_playlist_name
+
+
+# Tests generating the playlist name without any abbreviation.
+def test_generate_playlist_name_no_abbreviation(month=2):
+    mock_date = date(2023, month, 1)
+    mock_playlist_date = mock_date.replace(month=month-1)
+    expected_playlist_name = mock_date.replace(month=month-1).strftime('%B %Y')
+    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_length = 'long')
+    assert generated_playlist_name == expected_playlist_name
