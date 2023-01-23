@@ -3,3 +3,4 @@ env/
 .cache*
 *pyproj
 *sln
+__pycache__/
