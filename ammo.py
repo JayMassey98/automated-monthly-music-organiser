@@ -1,36 +1,54 @@
-"""Generate a Spotify playlist containing your top 50 songs of the past month.
+"""Generates a Spotify playlist containing your top 50 songs of the past month.
 
 Usage:
-    python ammo.py <Client ID> <Client Secret> <Redirect URI> <username> <scope>
-    TODO: Arguments have not yet been created; these are currently hard-coded.
+    python ../ammo.py
 
 Outline:
-    Authenticate the user's Spotify credentials to allow the script to work.
-    Check if a playlist exists for the past month, exiting the script if so.
-    Use the user's credentials to pull HTML data containing their top songs.
-    Jump to the 4th ol in the parsed HTML, which contains the relevant data.
-    Store the nested il elements as a list, stripping irrelevant characters.
-    Send the user's list of songs to the Spotify API to generate a playlist.
+    This script retrieves the necessary information required to create a Spotify
+    playlist, such as a user's data, the playlist date, and its subsequent name.
+    After asserting that a playlist with the chosen name does not already exist,
+    one is generated with the user's most played songs from the previous month.
 
 References:
     See https://developer.spotify.com/documentation/web-api/ for API info.
+
+TODO:
+    Arguments for ammo.py are currently hard-coded instead of being supplied:
+    <Client ID>, <Client Secret>, <Redirect URI>, <username>, and <scope>.
+    Fix the doc-strings for each function so that they all match up properly.
 """
 
+# Built-In Libraries
+from datetime import date
 import sys
-import requests
+
+# External Libraries
 from bs4 import BeautifulSoup
+import requests
 import spotipy
 from spotipy import SpotifyOAuth
-from datetime import date
 
 
 def abort_script(error_message='An error has occurred!'):
+    """Exits the script after displaying an error message.
+
+    Args:
+        error_message: A string describing the error that has occurred.
+    """
 
     error_message = error_message + ' Script aborted.\n\n'
     sys.exit(error_message)
 
 
 def get_spotify_data():
+    """Authenticate the user's Spotify credentials to allow data transfer.
+    
+    Returns:
+        spotify_data: A Spotify object containing the user's Spotify data.
+
+    Todo:
+        Convert the following variables into supplied arguments.
+    """
 
     # Set up the variables in order to request
     scope = 'playlist-modify-public'        # NOTE: Should this be an argument?
@@ -47,6 +65,14 @@ def get_spotify_data():
 
 
 def generate_playlist_date(todays_date=None):
+    """Generates the date of the playlist being created.
+
+    Args:
+        todays_date: The date that the function is being run on.
+
+    Returns:
+        playlist_date: The date of the playlist being created.
+    """
 
     # Determine the current date.
     if todays_date == None:
@@ -64,6 +90,15 @@ def generate_playlist_date(todays_date=None):
 
 
 def generate_playlist_name(playlist_date=None, month_length='short'):
+    """Generate the name of a playlist based on the date supplied.
+
+    Args:
+        playlist_date: The date of the playlist being created.
+        month_length: Determines how to display the chosen month.
+
+    Returns:
+        A string representing the name of the playlist.
+    """
 
     # Catch the case where no playlist date is supplied.
     if not playlist_date:
@@ -78,6 +113,12 @@ def generate_playlist_name(playlist_date=None, month_length='short'):
 
 
 def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
+    """Asserts that a playlist with the supplied name does not already exist.
+
+    Args:
+        playlist_name: A string with the name of the playlist to check for.
+        spotify_data: A Spotify object containing the user's Spotify data.
+    """
 
     # Initially assume this playlist does not exist.
     playlist_exists = False
@@ -101,6 +142,11 @@ def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
 
 
 def get_most_played_songs():
+    """Use the user's credentials to pull HTML data containing their top songs.
+    
+    Returns:
+        most_played_songs: The most listened to songs of the past month.
+    """
 
     # Headers taken from Chrome's inspect element of favoritemusic.guru.
     headers = {
@@ -144,6 +190,13 @@ def get_most_played_songs():
 
 
 def generate_playlist(most_played_songs=[], playlist_date=None, spotify_data=None):
+    """Create a Spotify playlist containing the user's top songs of the month.
+
+    Args:
+        most_played_songs: A list of strings of song names.
+        playlist_date: The date of the playlist being created.
+        spotify_data: A Spotify object containing the user's Spotify data.
+    """
     
     # Catch the case where no list of songs is supplied.
     if not most_played_songs:
@@ -196,6 +249,9 @@ def generate_playlist(most_played_songs=[], playlist_date=None, spotify_data=Non
 
 
 def main():
+    """Serves as the entry point for the script, which generates a Spotify
+    playlist consisting of a user's most played songs from the past month.
+    """
         
     # Get the playlist requirements.
     spotify_data = get_spotify_data()
