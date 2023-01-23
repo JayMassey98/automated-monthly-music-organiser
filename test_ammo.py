@@ -134,3 +134,28 @@ def test_assert_playlist_does_not_exist_is_true():
     spotify_data = mock_SpotifyOAuth().client
     assert_playlist_does_not_exist(playlist_name='new_playlist', spotify_data=spotify_data)
     assert True
+
+
+
+# ----------------------
+# test_generate_playlist
+# ----------------------
+
+# TODO: Add more tests that check mocked data.
+
+
+# Tests a playlist is generated from the supplied Spotify data.
+def test_generate_playlist():
+
+    # Creates mock inputs.
+    most_played_songs = ['song_1', 'song_2', 'song_3']
+    playlist_date = generate_playlist_date()
+    spotify_data = mock_SpotifyOAuth().client
+
+    # Tests the function can be called.
+    generate_playlist(
+        most_played_songs=most_played_songs,
+        playlist_date=playlist_date,
+        spotify_data=spotify_data)
+
+    # TODO: Examine the generated playlist.
