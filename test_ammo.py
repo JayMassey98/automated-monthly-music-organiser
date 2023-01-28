@@ -41,6 +41,18 @@ class mock_SpotifyClient():
         return 'mock_user'
     def current_user_playlists(self):
         return {'items': [{'name': 'existing_playlist'}]}
+    def current_user_top_tracks(self, time_range, limit):
+        return {'items':[{'uri': 'track_id'}]}
+    def user_playlist_create(self, user, name, public, description):
+        return 'new_playlist'
+    def user_playlists(self, user):
+        return {'items':[{'id': 'playlist_id'}]}
+    def user_playlist_add_tracks(self, user, playlist_id, tracks):
+        pass
+    def search(self, q):
+        return {'tracks': {'items': [{'id': 'song_1', 'uri': 'test_uri'},
+                                     {'id': 'song_2', 'uri': 'test_uri'},
+                                     {'id': 'song_3', 'uri': 'test_uri'}]}}
 
 
 
@@ -137,11 +149,24 @@ def test_assert_playlist_does_not_exist_is_true():
 
 
 
+# --------------------------
+# test_get_most_played_songs
+# --------------------------
+
+
+# Tests the function returns a list of equal or less length than supplied limit.
+def test_get_most_played_songs():
+    spotify_data = mock_SpotifyOAuth().client
+    limit = 50
+    most_played_songs = get_most_played_songs()
+    assert type(most_played_songs) is list
+    assert len(most_played_songs) <= limit
+    
+
+
 # ----------------------
 # test_generate_playlist
 # ----------------------
-
-# TODO: Add more tests that check mocked data.
 
 
 # Tests a playlist is generated from the supplied Spotify data.
@@ -157,5 +182,3 @@ def test_generate_playlist():
         most_played_songs=most_played_songs,
         playlist_date=playlist_date,
         spotify_data=spotify_data)
-
-    # TODO: Examine the generated playlist.
