@@ -28,14 +28,14 @@ from spotipy import SpotifyOAuth
 # -----------------
 
 
-# Creates a mock SpotifyOAuth class that returns a mock Spotify client.
+# Create a mock SpotifyOAuth class that returns a mock Spotify client.
 class mock_SpotifyOAuth(SpotifyOAuth):
     def __init__(self, *args, **kwargs):
         self.client = mock_SpotifyClient()
         self._session = None
 
 
-# Creates a mock Spotify client containing various playlist functions.
+# Create a mock Spotify client containing various playlist functions.
 class mock_SpotifyClient():
     def user(self):
         return 'mock_user'
@@ -57,14 +57,14 @@ class mock_SpotifyClient():
 # -----------------
 
 
-# Tests aborting the script with the default error message.
+# Test aborting the script with the default error message.
 def test_abort_script_default_error_message():
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         abort_script()
     assert pytest_wrapped_e.value.code == 'An error has occurred! Script aborted.\n\n'
 
 
-# Tests aborting the script with a custom error message.
+# Test aborting the script with a custom error message.
 def test_abort_script_custom_error_message():
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         abort_script("Custom error message.")
@@ -77,42 +77,42 @@ def test_abort_script_custom_error_message():
 # ---------------------------
 
 
-# Tests generating the playlist name for all months in the year.
+# Test generating the playlist name for all months in the year.
 def test_generate_playlist_name_for_all_months():
 
     # Generate a playlist date first.
     generate_playlist_date()
 
-    # Tests once for each month in the year.
+    # Test once for each month in the year.
     test_generate_playlist_name_for_only_january()
     for month in range(1, 12):
         test_generate_playlist_name_when_not_january(month + 1)
 
 
-# Tests generating the playlist name when the current month is January.
+# Test generating the playlist name when the current month is January.
 def test_generate_playlist_name_for_only_january():
     mock_date = date(2023, 1, 1)
     mock_playlist_date = mock_date.replace(year=2022, month=12)
     expected_playlist_name = mock_date.replace(year=2022, month=12).strftime('%b %Y')
-    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_length = 'short')
+    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_format = 'short')
     assert generated_playlist_name == expected_playlist_name
 
 
-# Tests generating the playlist name when the current month is not January.
+# Test generating the playlist name when the current month is not January.
 def test_generate_playlist_name_when_not_january(month=2):
     mock_date = date(2023, month, 1)
     mock_playlist_date = mock_date.replace(month=month-1)
     expected_playlist_name = mock_date.replace(month=month-1).strftime('%b %Y')
-    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_length = 'short')
+    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_format = 'short')
     assert generated_playlist_name == expected_playlist_name
 
 
-# Tests generating the playlist name without any abbreviation.
+# Test generating the playlist name without any abbreviation.
 def test_generate_playlist_name_no_abbreviation(month=2):
     mock_date = date(2023, month, 1)
     mock_playlist_date = mock_date.replace(month=month-1)
     expected_playlist_name = mock_date.replace(month=month-1).strftime('%B %Y')
-    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_length = 'long')
+    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_format = 'long')
     assert generated_playlist_name == expected_playlist_name
 
 
@@ -122,14 +122,14 @@ def test_generate_playlist_name_no_abbreviation(month=2):
 # -----------------------------------
 
 
-# Tests the function raises an exception when no spotify data is supplied.
+# Test the function raises an exception when no spotify data is supplied.
 def test_assert_playlist_does_not_exist_no_data():
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         assert_playlist_does_not_exist(playlist_name='existing_playlist')
     assert pytest_wrapped_e.value.code == 'No Spotify data supplied! Script aborted.\n\n'
 
 
-# Tests the function raises an exception when the playlist already exists.
+# Test the function raises an exception when the playlist already exists.
 def test_assert_playlist_does_not_exist_is_false():
     spotify_data = mock_SpotifyOAuth().client
     with pytest.raises(SystemExit) as pytest_wrapped_e:
@@ -137,7 +137,7 @@ def test_assert_playlist_does_not_exist_is_false():
     assert pytest_wrapped_e.value.code == 'A playlist called existing_playlist already exists! Script aborted.\n\n'
 
 
-# Tests the function does not raise an exception when the playlist does not already exist.
+# Test the function does not raise an exception when the playlist does not already exist.
 def test_assert_playlist_does_not_exist_is_true():
     spotify_data = mock_SpotifyOAuth().client
     assert_playlist_does_not_exist(playlist_name='new_playlist', spotify_data=spotify_data)
@@ -150,7 +150,7 @@ def test_assert_playlist_does_not_exist_is_true():
 # --------------------------
 
 
-# Tests the function returns a list of equal or less length than supplied limit.
+# Test the function returns a list of equal or less length than supplied limit.
 def test_get_most_played_songs():
     spotify_data = mock_SpotifyOAuth().client
     limit = 50
@@ -165,15 +165,15 @@ def test_get_most_played_songs():
 # ----------------------
 
 
-# Tests a playlist is generated from the supplied Spotify data.
+# Test a playlist is generated from the supplied Spotify data.
 def test_generate_playlist():
 
-    # Creates mock inputs.
+    # Create mock inputs.
     most_played_songs = ['song_1', 'song_2', 'song_3']
     playlist_date = generate_playlist_date()
     spotify_data = mock_SpotifyOAuth().client
 
-    # Tests the function can be called.
+    # Test the function can be called.
     generate_playlist(
         most_played_songs=most_played_songs,
         playlist_date=playlist_date,

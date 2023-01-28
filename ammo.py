@@ -31,27 +31,28 @@ from spotipy import SpotifyOAuth
 
 
 def abort_script(error_message='An error has occurred!'):
-    """Exits the script after displaying an error message.
+    """Exit the script after displaying an error message.
 
     Args:
         error_message: A string describing the error that has occurred.
     """
 
+    # Provide the reason for the script being aborted.
     error_message = error_message + ' Script aborted.\n\n'
     sys.exit(error_message)
 
 
 def get_spotify_data():
-    """Authenticate the user's Spotify credentials to allow data transfer.
+    """Authenticate a user's Spotify credentials to allow data transfer.
     
     Returns:
-        spotify_data: A Spotify object containing the user's Spotify data.
+        spotify_data: A Spotify object containing a user's Spotify data.
 
     Todo:
         Convert the following variables into supplied arguments.
     """
 
-    # Set up the variables in order to request
+    # Set up the variables needed for requesting Spotify credentials.
     username = '21js3bu3h7ixjemm7ypamzlga'  # NOTE: This should be an argument.
     client_id = None        # NOTE: Currently hard-coded via setx on my home PC.
     client_secret = None    # NOTE: Currently hard-coded via setx on my home PC.
@@ -65,7 +66,7 @@ def get_spotify_data():
 
 
 def generate_playlist_date(todays_date=None):
-    """Generates the date of the playlist being created.
+    """Generate the date of the playlist being created.
 
     Args:
         todays_date: The date that the function is being run on.
@@ -89,12 +90,12 @@ def generate_playlist_date(todays_date=None):
     return playlist_date
 
 
-def generate_playlist_name(playlist_date=None, month_length='short'):
+def generate_playlist_name(playlist_date=None, month_format='short'):
     """Generate the name of a playlist based on the date supplied.
 
     Args:
         playlist_date: The date of the playlist being created.
-        month_length: Determines how to display the chosen month.
+        month_format: A string that chooses how to display the month.
 
     Returns:
         A string representing the name of the playlist.
@@ -104,7 +105,8 @@ def generate_playlist_name(playlist_date=None, month_length='short'):
     if not playlist_date:
         abort_script(error_message='No playlist date supplied!')
 
-    if month_length == 'short':
+    # Choose which format is used for name generation.
+    if month_format == 'short':
         playlist_name = playlist_date.strftime('%b %Y')
     else:
         playlist_name = playlist_date.strftime('%B %Y')
@@ -113,19 +115,19 @@ def generate_playlist_name(playlist_date=None, month_length='short'):
 
 
 def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
-    """Asserts that a playlist with the supplied name does not already exist.
+    """Assert that a playlist with the supplied name does not already exist.
 
     Args:
         playlist_name: A string with the name of the playlist to check for.
         spotify_data: A Spotify object containing the user's Spotify data.
     """
 
-    # Initially assume this playlist does not exist.
-    playlist_exists = False
-
     # Catch the case where no spotify data is supplied.
     if not spotify_data:
         abort_script(error_message='No Spotify data supplied!')
+
+    # Initially assume the playlist does not exist.
+    playlist_exists = False
     
     # Extract the user's existing playlist's into a list.
     dictionary_of_playlist_data = spotify_data.current_user_playlists().items()
@@ -169,11 +171,11 @@ def generate_playlist(most_played_songs=None, spotify_data=None, playlist_date=N
         most_played_songs: The most listened to songs of the past month.
         spotify_data: A Spotify object containing the user's Spotify data.
         playlist_date: The date of the playlist being created.
-        username: The username ID of the user running the script.
+        username: The username of the user running the script.
     """
 
     # Catch the case where no list of songs is supplied.
-    if not playlist_date:
+    if not most_played_songs:
         abort_script(error_message='No list of songs supplied!')
     
     # Catch the case where no Spotify data is supplied.
@@ -185,7 +187,7 @@ def generate_playlist(most_played_songs=None, spotify_data=None, playlist_date=N
         abort_script(error_message='No playlist date supplied!')
 
     # Catch the case where no username ID is supplied.
-    if not playlist_date:
+    if not username:
         abort_script(error_message='No username ID supplied!')
 
     # Song total could be less than the supplied limit.
@@ -198,8 +200,8 @@ def generate_playlist(most_played_songs=None, spotify_data=None, playlist_date=N
         playlist_description = 'My top ' + str(songs_total) + ' most played songs of '
 
     # Get both the short and long versions of the playlist name for its description.
-    playlist_name_short = generate_playlist_name(playlist_date=playlist_date, month_length='short')
-    playlist_name_long = generate_playlist_name(playlist_date=playlist_date, month_length='long')
+    playlist_name_short = generate_playlist_name(playlist_date=playlist_date, month_format='short')
+    playlist_name_long = generate_playlist_name(playlist_date=playlist_date, month_format='long')
     playlist_description = playlist_description + playlist_name_long + '. Auto-generated with A.M.M.O. Visit https://github.com/JayMassey98 for more information.'
 
     # TODO: Replace this line with an argument.
@@ -212,16 +214,16 @@ def generate_playlist(most_played_songs=None, spotify_data=None, playlist_date=N
 
 
 def main():
-    """Serves as the entry point for the script, which generates a Spotify
-    playlist consisting of a user's most played songs from the past month.
+    """The entry point for this script, which will generate a Spotify playlist
+    containing the user's most played songs on Spotify within the past month.
     """
         
     # Get the playlist requirements.
     spotify_data = get_spotify_data()
     playlist_date = generate_playlist_date()
-    playlist_name = generate_playlist_name(playlist_date=playlist_date, month_length='short')
+    playlist_name = generate_playlist_name(playlist_date=playlist_date, month_format='short')
 
-    # Stops the script if the playlist already exists.
+    # Stop the script if the playlist already exists.
     assert_playlist_does_not_exist(playlist_name=playlist_name, spotify_data=spotify_data)
 
     # Generate the playlist with your most played songs.
@@ -230,6 +232,6 @@ def main():
                       playlist_date=playlist_date, username=None)
 
 
-# Only runs if called directly.
+# Run if called directly.
 if __name__ == '__main__':
     main()
