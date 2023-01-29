@@ -13,7 +13,6 @@ References:
 
 # Built-In Libraries
 from datetime import date
-import sys
 
 # External Libraries
 from ammo import *
@@ -51,25 +50,6 @@ class mock_SpotifyOAuth(mock_SpotifyClient):
     def __init__(self, *args, **kwargs):
         self.client = mock_SpotifyClient()
         self._session = None
-
-
-# -----------------
-# test_abort_script
-# -----------------
-
-
-# Test aborting the script with the default error message.
-def test_abort_script_default_error_message():
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        abort_script()
-    assert pytest_wrapped_e.value.code == 'An error has occurred! Script aborted.\n\n'
-
-
-# Test aborting the script with a custom error message.
-def test_abort_script_custom_error_message():
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        abort_script("Custom error message.")
-    assert pytest_wrapped_e.value.code == 'Custom error message. Script aborted.\n\n'
 
 
 
@@ -173,17 +153,17 @@ def test_generate_playlist_name_no_abbreviation(month=2):
 
 # Test the function raises an exception when no spotify data is supplied.
 def test_assert_playlist_does_not_exist_no_data():
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
-        assert_playlist_does_not_exist(playlist_name='existing_playlist')
-    assert pytest_wrapped_e.value.code == 'No Spotify data supplied! Script aborted.\n\n'
+    with pytest.raises(ValueError) as expected_error:
+        assert_playlist_does_not_exist()
+    assert str(expected_error.value) == 'No Spotify data supplied!'
 
 
 # Test the function raises an exception when the playlist already exists.
 def test_assert_playlist_does_not_exist_is_false():
     spotify_data = mock_SpotifyOAuth().client
-    with pytest.raises(SystemExit) as pytest_wrapped_e:
+    with pytest.raises(ValueError) as expected_error:
         assert_playlist_does_not_exist(playlist_name='existing_playlist', spotify_data=spotify_data)
-    assert pytest_wrapped_e.value.code == 'A playlist called existing_playlist already exists! Script aborted.\n\n'
+    assert str(expected_error.value) == 'A playlist called existing_playlist already exists!'
 
 
 # Test the function does not raise an exception when the playlist does not already exist.
@@ -199,8 +179,15 @@ def test_assert_playlist_does_not_exist_is_true():
 # --------------------------
 
 
+# Test the function raises an exception when no spotify data is supplied.
+def test_get_most_played_songs_no_data():
+    with pytest.raises(ValueError) as expected_error:
+        get_most_played_songs()
+    assert str(expected_error.value) == 'No Spotify data supplied!'
+
+
 # Test the function returns a list of equal or less length than supplied limit.
-def test_get_most_played_songs():
+def test_get_most_played_songs_from_data():
     spotify_data = mock_SpotifyOAuth().client
     limit = 50
     most_played_songs = get_most_played_songs(spotify_data=spotify_data, limit=limit)
@@ -214,8 +201,23 @@ def test_get_most_played_songs():
 # ----------------------
 
 
+# Test the function raises an exception when no list of tracks is supplied.
+def test_generate_playlist_no_tracks():
+    with pytest.raises(ValueError) as expected_error:
+        generate_playlist()
+    assert str(expected_error.value) == 'No list of tracks supplied!'
+
+
+# Test the function raises an exception when no spotify data is supplied.
+def test_generate_playlist_no_data():
+    tracks = ['song_1', 'song_2', 'song_3']
+    with pytest.raises(ValueError) as expected_error:
+        generate_playlist(tracks=tracks)
+    assert str(expected_error.value) == 'No Spotify data supplied!'
+
+
 # Test a playlist is generated from the supplied Spotify data.
-def test_generate_playlist():
+def test_generate_playlist_from_data():
 
     # Create mock inputs.
     tracks = ['song_1', 'song_2', 'song_3']

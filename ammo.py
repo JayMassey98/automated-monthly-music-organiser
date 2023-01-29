@@ -16,26 +16,10 @@ References:
 # Built-In Libraries
 from datetime import date
 import os
-import sys
 
 # External Libraries
-from bs4 import BeautifulSoup
-import requests
-from requests.exceptions import HTTPError
 import spotipy
 from spotipy import SpotifyOAuth
-
-
-def abort_script(error_message='An error has occurred!'):
-    """Exit the script after displaying an error message.
-
-    Args:
-        error_message: A string describing the error that has occurred.
-    """
-
-    # Provide the reason for the script being aborted.
-    error_message = error_message + ' Script aborted.\n\n'
-    sys.exit(error_message)
 
 
 def set_environment_variables():
@@ -117,7 +101,7 @@ def generate_playlist_name(playlist_date=None, month_format='short'):
 
     # Catch the case where no playlist date is supplied.
     if not playlist_date:
-        abort_script(error_message='No playlist date supplied!')
+        raise ValueError('No playlist date supplied!')
 
     # Choose which format is used for name generation.
     if month_format == 'short':
@@ -138,13 +122,13 @@ def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
 
     # Catch the case where no spotify data is supplied.
     if not spotify_data:
-        abort_script(error_message='No Spotify data supplied!')
+        raise ValueError('No Spotify data supplied!')
 
     # Extract the user's existing playlists using list comprehension.
     existing_playlists = [playlist['name'] for playlist in
                           spotify_data.current_user_playlists()['items']]
     if playlist_name in existing_playlists:
-        abort_script(f'A playlist called {playlist_name} already exists!')
+        raise ValueError(f'A playlist called {playlist_name} already exists!')
 
 
 def get_most_played_songs(spotify_data=None, limit=50):
@@ -159,7 +143,7 @@ def get_most_played_songs(spotify_data=None, limit=50):
 
     # Catch the case where no Spotify data is supplied.
     if not spotify_data:
-        abort_script(error_message='No Spotify data supplied!')
+        raise ValueError('No Spotify data supplied!')
 
     # Extract all Spotify track ID's using list comprehension.
     most_played_songs = [song['uri'] for song in spotify_data.
@@ -182,11 +166,11 @@ def generate_playlist(tracks=None, spotify_data=None,
 
     # Catch the case where no list of tracks is supplied.
     if not tracks:
-        abort_script(error_message='No list of tracks supplied!')
+        raise ValueError('No list of tracks supplied!')
     
     # Catch the case where no Spotify data is supplied.
     if not spotify_data:
-        abort_script(error_message='No Spotify data supplied!')
+        raise ValueError('No Spotify data supplied!')
 
     # Catch the case where no playlist date is supplied.
     playlist_date = playlist_date or generate_playlist_date()
