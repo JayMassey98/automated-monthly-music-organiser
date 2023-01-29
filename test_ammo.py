@@ -41,7 +41,7 @@ class mock_SpotifyClient():
     def user_playlists(self, user):
         return {'items': [{'id': 'playlist_id'}]}
     def user_playlist_create(self, user, name, public, description):
-        return {'name': name}
+        return {'id': 'new_playlist_id'}
     def user_playlist_add_tracks(self, user, playlist_id, tracks):
         pass
 
@@ -218,12 +218,12 @@ def test_get_most_played_songs():
 def test_generate_playlist():
 
     # Create mock inputs.
-    most_played_songs = ['song_1', 'song_2', 'song_3']
-    playlist_date = generate_playlist_date()
+    tracks = ['song_1', 'song_2', 'song_3']
+    playlist_date = date(2023, 2, 1)
     spotify_data = mock_SpotifyOAuth().client
 
     # Test the function can be called.
     generate_playlist(
-        tracks=most_played_songs,
+        tracks=tracks,
         playlist_date=playlist_date,
         spotify_data=spotify_data)

@@ -83,10 +83,10 @@ def generate_playlist_date(todays_date=None):
     """Generate the date of the playlist being created.
 
     Args:
-        todays_date: The date that the function is being run on.
+        todays_date: The date that the function is being run for.
 
     Returns:
-        playlist_date: The date of the playlist being created.
+        playlist_date: The date of the playlist that is being created.
     """
 
     # Determine the current date.
@@ -108,7 +108,7 @@ def generate_playlist_name(playlist_date=None, month_format='short'):
     """Generate the name of a playlist based on the date supplied.
 
     Args:
-        playlist_date: The date of the playlist being created.
+        playlist_date: The date of the playlist that is being created.
         month_format: A string that chooses how to display the month.
 
     Returns:
@@ -163,18 +163,21 @@ def get_most_played_songs(spotify_data=None, limit=50):
 
     # Extract all Spotify track ID's using list comprehension.
     most_played_songs = [song['uri'] for song in spotify_data.
-            current_user_top_tracks(time_range='short_term', limit=limit)['items']]
+                         current_user_top_tracks(time_range='short_term',
+                                                 limit=limit)['items']]
 
     return most_played_songs
 
 
-def generate_playlist(tracks=None, spotify_data=None, playlist_date=None, title_format='short'):
+def generate_playlist(tracks=None, spotify_data=None,
+                      playlist_date=None, title_format='short'):
     """Create a Spotify playlist of the user's currently most played tracks.
 
     Args:
         tracks: A list of the user's currently most played tracks on Spotify.
         spotify_data: A Spotify object containing the user's Spotify data.
-        playlist_date: The date of the playlist being created.
+        playlist_date: The date of the playlist that is being created.
+        title_format: A string determining the playlist's title format.
     """
 
     # Catch the case where no list of tracks is supplied.
@@ -186,38 +189,44 @@ def generate_playlist(tracks=None, spotify_data=None, playlist_date=None, title_
         abort_script(error_message='No Spotify data supplied!')
 
     # Catch the case where no playlist date is supplied.
-    if not playlist_date:
-        playlist_date = generate_playlist_date()
-
-    # Song total could be less than the supplied limit.
-    songs_total = len(tracks)
+    playlist_date = playlist_date or generate_playlist_date()
 
     # Determine the start of the playlist's description.
+    songs_total = len(tracks)
     if songs_total == 1:
         description = 'My top most played song of '
     else:
         description = 'My top ' + str(songs_total) + ' most played songs of '
 
-    # Get both the short and long versions of the playlist name; either may be required.
-    name_short = generate_playlist_name(playlist_date=playlist_date, month_format='short')
-    name_long = generate_playlist_name(playlist_date=playlist_date, month_format='long')
+    # Get both formats of the playlist name; both are required below.
+    name_short = generate_playlist_name(playlist_date=playlist_date,
+                                        month_format='short')
+    name_long = generate_playlist_name(playlist_date=playlist_date,
+                                       month_format='long')
+
+    # Determine the description's name format.
     if title_format == 'short':
         name_for_description = name_short
     else:
         name_for_description = name_long
+
+    # Generate the description for the playlist.
     description = (description
                    + name_for_description
-                   + '. Auto-generated with A.M.M.O. '
-                   + 'Visit https://github.com/JayMassey98 for more information.')
+                   + '. Auto-generated with A.M.M.O. Visit '
+                   + 'https://github.com/JayMassey98'
+                   + ' for more information.')
     
-    # Auto-generate the playlist and add the determined songs to it.
+    # Generate the playlist and obtain its resulting ID.
     user = spotify_data.current_user()['id']
     is_playlist_public = True
-    spotify_data.user_playlist_create(user=user,
-                                      name=name_short,
-                                      public=is_playlist_public,
-                                      description=description)
-    playlist_id = spotify_data.user_playlists(user=user)['items'][0]['id']
+    playlist_id = spotify_data.user_playlist_create(user=user,
+                                                    name=name_short,
+                                                    public=is_playlist_public,
+                                                    description=description
+                                                    )['id']
+
+    # Add the supplied tracks to the generated playlist.
     spotify_data.user_playlist_add_tracks(user=user,
                                           playlist_id=playlist_id,
                                           tracks=tracks)
