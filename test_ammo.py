@@ -28,13 +28,6 @@ from spotipy import SpotifyOAuth
 # -----------------
 
 
-# Create a mock SpotifyOAuth class that returns a mock Spotify client.
-class mock_SpotifyOAuth(SpotifyOAuth):
-    def __init__(self, *args, **kwargs):
-        self.client = mock_SpotifyClient()
-        self._session = None
-
-
 # Create a mock Spotify client containing various playlist functions.
 class mock_SpotifyClient():
     def user(self):
@@ -48,10 +41,16 @@ class mock_SpotifyClient():
     def user_playlists(self, user):
         return {'items': [{'id': 'playlist_id'}]}
     def user_playlist_create(self, user, name, public, description):
-        return 'new_playlist'
+        return {'name': name}
     def user_playlist_add_tracks(self, user, playlist_id, tracks):
         pass
 
+
+# Create a mock SpotifyOAuth class that returns a mock Spotify client.
+class mock_SpotifyOAuth(mock_SpotifyClient):
+    def __init__(self, *args, **kwargs):
+        self.client = mock_SpotifyClient()
+        self._session = None
 
 
 # -----------------
@@ -225,6 +224,6 @@ def test_generate_playlist():
 
     # Test the function can be called.
     generate_playlist(
-        most_played_songs=most_played_songs,
+        tracks=most_played_songs,
         playlist_date=playlist_date,
         spotify_data=spotify_data)
