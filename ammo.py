@@ -140,21 +140,11 @@ def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
     if not spotify_data:
         abort_script(error_message='No Spotify data supplied!')
 
-    # Initially assume the playlist does not exist.
-    playlist_exists = False
-    
-    # Extract the user's existing playlist's into a list.
-    dictionary_of_playlist_data = spotify_data.current_user_playlists().items()
-    list_of_users_playlists = spotify_data.current_user_playlists()['items']
-    playlists_total = len(list_of_users_playlists)
-    playlists_left = playlists_total
-
-    # Make sure the monthly playlist does not already exist.
-    while playlists_left:
-        current_playlist = playlists_total - playlists_left
-        if playlist_name == list_of_users_playlists[current_playlist]['name']:
-            abort_script('A playlist called ' + playlist_name + ' already exists!')
-        playlists_left -= 1
+    # Extract the user's existing playlists using list comprehension.
+    existing_playlists = [playlist['name'] for playlist in
+                          spotify_data.current_user_playlists()['items']]
+    if playlist_name in existing_playlists:
+        abort_script(f'A playlist called {playlist_name} already exists!')
 
 
 def get_most_played_songs(spotify_data=None, limit=50):
