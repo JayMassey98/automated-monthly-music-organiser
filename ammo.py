@@ -131,14 +131,14 @@ def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
         raise ValueError(f'A playlist called {playlist_name} already exists!')
 
 
-def get_most_played_songs(spotify_data=None, limit=50):
-    """Use the user's credentials to request their most listened to songs.
+def get_most_played_tracks(spotify_data=None, limit=50):
+    """Use the user's credentials to get ID's of their most listened tracks.
 
     Args:
         spotify_data: A Spotify object containing the user's Spotify data.
     
     Returns:
-        most_played_songs: The most listened to songs of the past month.
+        most_played_tracks: The most listened to songs of the past month.
     """
 
     # Catch the case where no Spotify data is supplied.
@@ -146,11 +146,11 @@ def get_most_played_songs(spotify_data=None, limit=50):
         raise ValueError('No Spotify data supplied!')
 
     # Extract all Spotify track ID's using list comprehension.
-    most_played_songs = [song['uri'] for song in spotify_data.
+    most_played_tracks = [track['uri'] for track in spotify_data.
                          current_user_top_tracks(time_range='short_term',
                                                  limit=limit)['items']]
 
-    return most_played_songs
+    return most_played_tracks
 
 
 def generate_playlist(tracks=None, spotify_data=None,
@@ -176,11 +176,11 @@ def generate_playlist(tracks=None, spotify_data=None,
     playlist_date = playlist_date or generate_playlist_date()
 
     # Determine the start of the playlist's description.
-    songs_total = len(tracks)
-    if songs_total == 1:
+    tracks_total = len(tracks)
+    if tracks_total == 1:
         description = 'My top most played song of '
     else:
-        description = 'My top ' + str(songs_total) + ' most played songs of '
+        description = 'My top ' + str(tracks_total) + ' most played songs of '
 
     # Get both formats of the playlist name; both are required below.
     name_short = generate_playlist_name(playlist_date=playlist_date,
@@ -234,9 +234,9 @@ def main():
     assert_playlist_does_not_exist(playlist_name=playlist_name,
                                    spotify_data=spotify_data)
 
-    # Generate the playlist with the user's most played songs.
-    most_played_songs = get_most_played_songs(spotify_data=spotify_data)
-    generate_playlist(tracks=most_played_songs,
+    # Generate the playlist with the user's most played tracks.
+    most_played_tracks = get_most_played_tracks(spotify_data=spotify_data)
+    generate_playlist(tracks=most_played_tracks,
                       spotify_data=spotify_data,
                       playlist_date=playlist_date)
 

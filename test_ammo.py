@@ -125,7 +125,7 @@ def test_generate_playlist_name_not_january(month=2):
 
 
 # Test generating the playlist name for all months in the year.
-def test_generate_playlist_name_for_all_months():
+def test_generate_playlist_name_all_months():
 
     # Generate a playlist date first.
     generate_playlist_date()
@@ -174,25 +174,25 @@ def test_assert_playlist_does_not_exist_is_true():
 
 
 
-# --------------------------
-# test_get_most_played_songs
-# --------------------------
+# ---------------------------
+# test_get_most_played_tracks
+# ---------------------------
 
 
 # Test the function raises an exception when no spotify data is supplied.
-def test_get_most_played_songs_no_data():
+def test_get_most_played_tracks_no_data():
     with pytest.raises(ValueError) as expected_error:
-        get_most_played_songs()
+        get_most_played_tracks()
     assert str(expected_error.value) == 'No Spotify data supplied!'
 
 
 # Test the function returns a list of equal or less length than supplied limit.
-def test_get_most_played_songs_from_data():
+def test_get_most_played_tracks_from_data():
     spotify_data = mock_SpotifyOAuth().client
     limit = 50
-    most_played_songs = get_most_played_songs(spotify_data=spotify_data, limit=limit)
-    assert type(most_played_songs) is list
-    assert len(most_played_songs) <= limit
+    most_played_tracks = get_most_played_tracks(spotify_data=spotify_data, limit=limit)
+    assert type(most_played_tracks) is list
+    assert len(most_played_tracks) <= limit
     
 
 
