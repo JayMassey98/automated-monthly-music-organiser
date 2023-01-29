@@ -51,13 +51,13 @@ def set_environment_variables():
     # Ensure all the Spotipy environment variables are set.
     missing_variables = [variable for variable,
                          prompt in environment_variables.items()
-                         if os.environ.get(variable) is None]
+                         if not os.environ.get(variable)]
     if missing_variables:
         print('Please input the required items below.\n')
     
     # Set any missing Spotipy environment variables.
     for variable, prompt in environment_variables.items():
-        if os.environ.get(variable) is None:
+        if not os.environ.get(variable):
             os.environ[variable] = input(prompt)
 
     # For better script spacing.
@@ -90,7 +90,7 @@ def generate_playlist_date(todays_date=None):
     """
 
     # Determine the current date.
-    if todays_date == None:
+    if not todays_date:
         todays_date = date.today()
     month = todays_date.month
     year = todays_date.year
