@@ -40,29 +40,29 @@ def abort_script(error_message='An error has occurred!'):
 
 def set_environment_variables():
     """Set environment variables required for the Spotipy library."""
-
-    # Get the relevant Spotipy environment variables.
-    spotipy_client_id = os.environ.get('SPOTIPY_CLIENT_ID')
-    spotipy_client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
-    spotipy_redirect_uri = os.environ.get('SPOTIPY_REDIRECT_URI')
     
-    # Ensure all the required environment variables are set.
-    if (spotipy_client_id is None or
-        spotipy_client_secret is None or
-        spotipy_redirect_uri is None):
+    # All the required Spotipy environment variables.
+    environment_variables = {
+        "SPOTIPY_CLIENT_ID": "Client ID: ",
+        "SPOTIPY_CLIENT_SECRET": "Client Secret: ",
+        "SPOTIPY_REDIRECT_URI": "Redirect URI: "
+    }
+    
+    # Ensure all the Spotipy environment variables are set.
+    missing_variables = [variable for variable,
+                         prompt in environment_variables.items()
+                         if os.environ.get(variable) is None]
+    if missing_variables:
         print('Please input the required items below.\n')
+    
+    # Set any missing Spotipy environment variables.
+    for variable, prompt in environment_variables.items():
+        if os.environ.get(variable) is None:
+            os.environ[variable] = input(prompt)
 
-    if spotipy_client_id is None:
-        client_id = input('Client ID: ')
-        os.environ['SPOTIPY_CLIENT_ID'] = client_id
-
-    if spotipy_client_secret is None:
-        client_secret = input('Client Secret: ')
-        os.environ['SPOTIPY_CLIENT_SECRET'] = client_secret
-
-    if spotipy_redirect_uri is None:
-        redirect_uri = input('Redirect URI: ')
-        os.environ['SPOTIPY_REDIRECT_URI'] = redirect_uri
+    # For better script spacing.
+    if missing_variables:
+        print()
 
 
 def get_spotify_data():
