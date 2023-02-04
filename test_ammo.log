@@ -1,0 +1,23 @@
+============================= test session starts =============================
+collecting ... collected 18 items
+
+..\test_ammo.py::test_set_environment_variables_all_set PASSED           [  5%]
+..\test_ammo.py::test_set_environment_variables_none_set PASSED          [ 11%]
+..\test_ammo.py::test_generate_playlist_name_for_january PASSED          [ 16%]
+..\test_ammo.py::test_generate_playlist_name_not_january PASSED          [ 22%]
+..\test_ammo.py::test_generate_playlist_name_all_months PASSED           [ 27%]
+..\test_ammo.py::test_generate_playlist_name_long_format PASSED          [ 33%]
+..\test_ammo.py::test_check_if_playlist_exists_no_data PASSED            [ 38%]
+..\test_ammo.py::test_check_if_playlist_exists_is_true PASSED            [ 44%]
+..\test_ammo.py::test_check_if_playlist_exists_is_false PASSED           [ 50%]
+..\test_ammo.py::test_check_if_playlist_exists_allowed PASSED            [ 55%]
+..\test_ammo.py::test_get_most_played_tracks_no_data PASSED              [ 61%]
+..\test_ammo.py::test_get_most_played_tracks_from_data PASSED            [ 66%]
+..\test_ammo.py::test_get_most_played_tracks_25_tracks PASSED            [ 72%]
+..\test_ammo.py::test_get_most_played_tracks_50_tracks PASSED            [ 77%]
+..\test_ammo.py::test_get_most_played_tracks_100_tracks PASSED           [ 83%]
+..\test_ammo.py::test_generate_spotify_playlist_no_tracks PASSED         [ 88%]
+..\test_ammo.py::test_generate_spotify_playlist_no_data PASSED           [ 94%]
+..\test_ammo.py::test_generate_spotify_playlist_from_data PASSED         [100%]
+
+============================= 18 passed in 0.16s ==============================

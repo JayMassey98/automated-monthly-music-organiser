@@ -2,7 +2,8 @@
 a Spotify playlist containing a user's most played songs of the previous month.
 
 Usage:
-    pytest -v ../test_ammo.py
+    cmd /c "pytest -v --no-header ../test_ammo.py & pytest -v --no-header
+    ../test_ammo.py > ../test_ammo.log"
 
 Outline:
     Runs through each function, testing various possible cases for each.
