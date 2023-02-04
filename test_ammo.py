@@ -146,30 +146,30 @@ def test_generate_playlist_name_no_abbreviation(month=2):
 
 
 
-# -----------------------------------
-# test_assert_playlist_does_not_exist
-# -----------------------------------
+# -----------------------------
+# test_check_if_playlist_exists
+# -----------------------------
 
 
 # Test the function raises an exception when no spotify data is supplied.
-def test_assert_playlist_does_not_exist_no_data():
+def test_check_if_playlist_exists_no_data():
     with pytest.raises(ValueError) as expected_error:
-        assert_playlist_does_not_exist()
+        check_if_playlist_exists()
     assert str(expected_error.value) == 'No Spotify data supplied!'
 
 
 # Test the function raises an exception when the playlist already exists.
-def test_assert_playlist_does_not_exist_is_false():
+def test_check_if_playlist_exists_is_true():
     spotify_data = mock_SpotifyOAuth().client
     with pytest.raises(ValueError) as expected_error:
-        assert_playlist_does_not_exist(playlist_name='existing_playlist', spotify_data=spotify_data)
+        check_if_playlist_exists(playlist_name='existing_playlist', spotify_data=spotify_data)
     assert str(expected_error.value) == 'A playlist called existing_playlist already exists!'
 
 
 # Test the function does not raise an exception when the playlist does not already exist.
-def test_assert_playlist_does_not_exist_is_true():
+def test_check_if_playlist_exists_is_false():
     spotify_data = mock_SpotifyOAuth().client
-    assert_playlist_does_not_exist(playlist_name='new_playlist', spotify_data=spotify_data)
+    check_if_playlist_exists(playlist_name='new_playlist', spotify_data=spotify_data)
     assert True
 
 
@@ -216,16 +216,16 @@ def test_generate_playlist_no_data():
     assert str(expected_error.value) == 'No Spotify data supplied!'
 
 
-# Test a playlist is generated from the supplied Spotify data.
+# Test generating playlists correctly.
 def test_generate_playlist_from_data():
 
     # Create mock inputs.
     tracks = ['song_1', 'song_2', 'song_3']
-    playlist_date = date(2023, 2, 1)
     spotify_data = mock_SpotifyOAuth().client
+    playlist_date = date(2023, 2, 1)
 
     # Test the function can be called.
     generate_playlist(
         tracks=tracks,
-        playlist_date=playlist_date,
-        spotify_data=spotify_data)
+        spotify_data=spotify_data,
+        playlist_date=playlist_date)

@@ -112,8 +112,8 @@ def generate_playlist_name(playlist_date=None, month_format='short'):
     return playlist_name
 
 
-def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
-    """Assert that a playlist with the supplied name does not already exist.
+def check_if_playlist_exists(playlist_name='', spotify_data=None):
+    """Check if the user already has a playlist with the supplied name.
 
     Args:
         playlist_name: A string with the name of the playlist to check for.
@@ -128,7 +128,8 @@ def assert_playlist_does_not_exist(playlist_name='', spotify_data=None):
     existing_playlists = [playlist['name'] for playlist in
                           spotify_data.current_user_playlists()['items']]
     if playlist_name in existing_playlists:
-        raise ValueError(f'A playlist called {playlist_name} already exists!')
+        exist_output = f'A playlist called {playlist_name} already exists!'
+        raise ValueError(exist_output)
 
 
 def get_most_played_tracks(spotify_data=None, limit=50):
@@ -231,8 +232,8 @@ def main():
                                            month_format='short')
 
     # Stop the script if the playlist already exists.
-    assert_playlist_does_not_exist(playlist_name=playlist_name,
-                                   spotify_data=spotify_data)
+    check_if_playlist_exists(playlist_name=playlist_name,
+                             spotify_data=spotify_data)
 
     # Generate the playlist with the user's most played tracks.
     most_played_tracks = get_most_played_tracks(spotify_data=spotify_data)
