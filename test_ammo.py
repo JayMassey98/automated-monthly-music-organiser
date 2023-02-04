@@ -137,7 +137,7 @@ def test_generate_playlist_name_all_months():
 
 
 # Test generating the playlist name without any abbreviation.
-def test_generate_playlist_name_no_abbreviation(month=2):
+def test_generate_playlist_name_long_format(month=2):
     mock_date = date(2023, month, 1)
     mock_playlist_date = mock_date.replace(month=month-1)
     expected_playlist_name = mock_date.replace(month=month-1).strftime('%B %Y')
@@ -172,6 +172,19 @@ def test_check_if_playlist_exists_is_false():
     check_if_playlist_exists(playlist_name='new_playlist', spotify_data=spotify_data)
     assert True
 
+
+# Test the function creates a duplicate playlist if it is allowed to do so.
+def test_check_if_playlist_exists_allowed(capfd):
+    spotify_data = mock_SpotifyOAuth().client
+    check_if_playlist_exists(playlist_name='existing_playlist',
+                             spotify_data=spotify_data,
+                             duplicates_allowed=True)
+
+    # Pytest provided 'capfd' allows capturing console prints.
+    output, error = capfd.readouterr()
+    assert output == ('A playlist called existing_playlist already exists!\n' +
+                      'Creating another playlist called existing_playlist.\n')
+    assert error == ''
 
 
 # ---------------------------

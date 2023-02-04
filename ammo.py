@@ -14,6 +14,7 @@ References:
 """
 
 # Built-In Libraries
+import argparse
 from datetime import date
 import os
 
@@ -47,6 +48,32 @@ def set_environment_variables():
     # For better script spacing.
     if missing_variables:
         print()
+
+
+def get_optional_arguments():
+    """Get any arguments that have been supplied, supplying defaults if not.
+    
+    Returns:
+        args: A collection of arguments that can be supplied to the script.
+    """
+
+    # Call the argparse library to handle any supplied arguments.
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-m',
+                        '--month_format',
+                        help=('Determines how months are displayed in ' +
+                              'generated playlists.'),
+                        type=str,
+                        default='short')
+    parser.add_argument('-d',
+                        '--duplicates_allowed',
+                        help=('Determines if a playlist should be generated ' +
+                              'if one with the same name already exists.'),
+                        type=bool,
+                        default=False)
+    args = parser.parse_args()
+
+    return args
 
 
 def get_spotify_data():
@@ -112,7 +139,8 @@ def generate_playlist_name(playlist_date=None, month_format='short'):
     return playlist_name
 
 
-def check_if_playlist_exists(playlist_name='', spotify_data=None):
+def check_if_playlist_exists(playlist_name='', spotify_data=None,
+                             duplicates_allowed=False):
     """Check if the user already has a playlist with the supplied name.
 
     Args:
@@ -127,9 +155,15 @@ def check_if_playlist_exists(playlist_name='', spotify_data=None):
     # Extract the user's existing playlists using list comprehension.
     existing_playlists = [playlist['name'] for playlist in
                           spotify_data.current_user_playlists()['items']]
+
+    # Determine if a playlist should be made.
     if playlist_name in existing_playlists:
         exist_output = f'A playlist called {playlist_name} already exists!'
-        raise ValueError(exist_output)
+        if duplicates_allowed:
+            print(exist_output +
+                  f'\nCreating another playlist called {playlist_name}.')
+        else:
+            raise ValueError(exist_output)
 
 
 def get_most_played_tracks(spotify_data=None, limit=50):
@@ -155,7 +189,7 @@ def get_most_played_tracks(spotify_data=None, limit=50):
 
 
 def generate_playlist(tracks=None, spotify_data=None,
-                      playlist_date=None, title_format='short'):
+                      playlist_date=None, month_format='short'):
     """Create a Spotify playlist of the user's currently most played tracks.
 
     Args:
@@ -190,14 +224,14 @@ def generate_playlist(tracks=None, spotify_data=None,
                                        month_format='long')
 
     # Determine the description's name format.
-    if title_format == 'short':
-        name_for_description = name_short
+    if month_format == 'short':
+        name_for_title = name_short
     else:
-        name_for_description = name_long
+        name_for_title = name_long
 
     # Generate the description for the playlist.
     description = (description
-                   + name_for_description
+                   + name_long
                    + '. Auto-generated with A.M.M.O. Visit '
                    + 'https://github.com/JayMassey98'
                    + ' for more information.')
@@ -206,7 +240,7 @@ def generate_playlist(tracks=None, spotify_data=None,
     user = spotify_data.current_user()['id']
     is_playlist_public = True
     playlist_id = spotify_data.user_playlist_create(user=user,
-                                                    name=name_short,
+                                                    name=name_for_title,
                                                     public=is_playlist_public,
                                                     description=description
                                                     )['id']
@@ -222,24 +256,27 @@ def main():
     containing the user's most played songs on Spotify within the past month.
     """
 
-    # Perform any required setup.
+    # Perform required setup.
     set_environment_variables()
+    args = get_optional_arguments()
         
     # Get the playlist requirements.
     spotify_data = get_spotify_data()
     playlist_date = generate_playlist_date()
     playlist_name = generate_playlist_name(playlist_date=playlist_date,
-                                           month_format='short')
+                                           month_format=args.month_format)
 
     # Stop the script if the playlist already exists.
     check_if_playlist_exists(playlist_name=playlist_name,
-                             spotify_data=spotify_data)
+                             spotify_data=spotify_data,
+                             duplicates_allowed=args.duplicates_allowed)
 
     # Generate the playlist with the user's most played tracks.
     most_played_tracks = get_most_played_tracks(spotify_data=spotify_data)
     generate_playlist(tracks=most_played_tracks,
                       spotify_data=spotify_data,
-                      playlist_date=playlist_date)
+                      playlist_date=playlist_date,
+                      month_format=args.month_format)
 
 
 # Run if called directly.
