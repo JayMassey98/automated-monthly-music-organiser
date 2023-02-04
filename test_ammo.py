@@ -244,28 +244,28 @@ def test_get_most_played_tracks_100_tracks(capfd):
     
 
 
-# ----------------------
-# test_generate_playlist
-# ----------------------
+# ------------------------------
+# test_generate_spotify_playlist
+# ------------------------------
 
 
 # Test the function raises an exception when no list of tracks is supplied.
-def test_generate_playlist_no_tracks():
+def test_generate_spotify_playlist_no_tracks():
     with pytest.raises(ValueError) as expected_error:
-        generate_playlist()
+        generate_spotify_playlist()
     assert str(expected_error.value) == 'No list of tracks supplied!'
 
 
-# Test the function raises an exception when no spotify data is supplied.
-def test_generate_playlist_no_data():
+# Test the function raises an exception when no Spotify data is supplied.
+def test_generate_spotify_playlist_no_data():
     tracks = ['song_1', 'song_2', 'song_3']
     with pytest.raises(ValueError) as expected_error:
-        generate_playlist(tracks=tracks)
+        generate_spotify_playlist(tracks=tracks)
     assert str(expected_error.value) == 'No Spotify data supplied!'
 
 
-# Test generating playlists correctly.
-def test_generate_playlist_from_data():
+# Test generating Spotify playlists correctly.
+def test_generate_spotify_playlist_from_data():
 
     # Create mock inputs.
     tracks = ['song_1', 'song_2', 'song_3']
@@ -273,7 +273,7 @@ def test_generate_playlist_from_data():
     playlist_date = date(2023, 2, 1)
 
     # Test the function can be called.
-    generate_playlist(
+    generate_spotify_playlist(
         tracks=tracks,
         spotify_data=spotify_data,
         playlist_date=playlist_date)

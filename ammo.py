@@ -77,6 +77,11 @@ def get_optional_arguments():
                               'in the generated playlist (between 1 and 50).'),
                         type=int,
                         default=50)
+    parser.add_argument('-p',
+                        '--playlist_public',
+                        help='Determines if a playlist should be public.',
+                        type=bool,
+                        default=True)
     args = parser.parse_args()
 
     return args
@@ -90,7 +95,9 @@ def get_spotify_data():
     """
 
     # Provide the required authentication scopes for requesting Spotify data.
-    auth_manager = SpotifyOAuth(scope='user-top-read playlist-modify-public')
+    auth_manager = SpotifyOAuth(scope='user-top-read '
+                                + 'playlist-modify-public '
+                                + 'playlist-modify-private')
     spotify_data = spotipy.Spotify(auth_manager=auth_manager)
 
     return spotify_data
@@ -201,8 +208,9 @@ def get_most_played_tracks(spotify_data=None, tracks_total=50):
     return most_played_tracks
 
 
-def generate_playlist(tracks=None, spotify_data=None,
-                      playlist_date=None, month_format='short'):
+def generate_spotify_playlist(tracks=None, spotify_data=None,
+                              playlist_date=None, month_format='short',
+                              playlist_public=True):
     """Create a Spotify playlist of the user's currently most played tracks.
 
     Args:
@@ -230,11 +238,13 @@ def generate_playlist(tracks=None, spotify_data=None,
     else:
         description = 'My top ' + str(tracks_total) + ' most played songs of '
 
-    # Get both formats of the playlist name; both are required below.
-    name_short = generate_playlist_name(playlist_date=playlist_date,
-                                        month_format='short')
-    name_long = generate_playlist_name(playlist_date=playlist_date,
-                                       month_format='long')
+    # Get playlist name formats (both are required).
+    name_short = generate_playlist_name(
+        playlist_date=playlist_date,
+        month_format='short')
+    name_long = generate_playlist_name(
+        playlist_date=playlist_date,
+        month_format='long')
 
     # Determine the description's name format.
     if month_format == 'short':
@@ -251,17 +261,18 @@ def generate_playlist(tracks=None, spotify_data=None,
     
     # Generate the playlist and obtain its resulting ID.
     user = spotify_data.current_user()['id']
-    is_playlist_public = True
-    playlist_id = spotify_data.user_playlist_create(user=user,
-                                                    name=name_for_title,
-                                                    public=is_playlist_public,
-                                                    description=description
-                                                    )['id']
+    playlist_id = spotify_data.user_playlist_create(
+        user=user,
+        name=name_for_title,
+        public=playlist_public,
+        description=description
+        )['id']
 
     # Add the supplied tracks to the generated playlist.
-    spotify_data.user_playlist_add_tracks(user=user,
-                                          playlist_id=playlist_id,
-                                          tracks=tracks)
+    spotify_data.user_playlist_add_tracks(
+        user=user,
+        playlist_id=playlist_id,
+        tracks=tracks)
 
 
 def main():
@@ -292,11 +303,12 @@ def main():
         tracks_total=args.tracks_total)
 
     # Generate a playlist with the supplied items.
-    generate_playlist(
+    generate_spotify_playlist(
         tracks=most_played_tracks,
         spotify_data=spotify_data,
         playlist_date=playlist_date,
-        month_format=args.month_format)
+        month_format=args.month_format,
+        playlist_public=args.playlist_public)
 
 
 # Run if called directly.
