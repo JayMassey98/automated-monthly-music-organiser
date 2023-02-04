@@ -71,6 +71,12 @@ def get_optional_arguments():
                               'if one with the same name already exists.'),
                         type=bool,
                         default=False)
+    parser.add_argument('-t',
+                        '--tracks_total',
+                        help=('Determines the total number of tracks to use ' +
+                              'in the generated playlist (between 1 and 50).'),
+                        type=int,
+                        default=50)
     args = parser.parse_args()
 
     return args
@@ -166,24 +172,31 @@ def check_if_playlist_exists(playlist_name='', spotify_data=None,
             raise ValueError(exist_output)
 
 
-def get_most_played_tracks(spotify_data=None, limit=50):
+def get_most_played_tracks(spotify_data=None, tracks_total=50):
     """Use the user's credentials to get ID's of their most listened tracks.
 
     Args:
         spotify_data: A Spotify object containing the user's Spotify data.
+        tracks_total: An integer to determine how many tracks to retrieve.
     
     Returns:
-        most_played_tracks: The most listened to songs of the past month.
+        most_played_tracks: The user's most played tracks in the past month.
     """
 
     # Catch the case where no Spotify data is supplied.
     if not spotify_data:
         raise ValueError('No Spotify data supplied!')
 
+    # Ensure the tracks total supplied is valid.
+    if tracks_total is None or tracks_total < 1 or tracks_total > 50:
+        tracks_total = 50
+        print('An invalid number of tracks has been requested!\n' +
+              f'Switched to the default request of {tracks_total} tracks.')
+
     # Extract all Spotify track ID's using list comprehension.
     most_played_tracks = [track['uri'] for track in spotify_data.
                          current_user_top_tracks(time_range='short_term',
-                                                 limit=limit)['items']]
+                                                 limit=tracks_total)['items']]
 
     return most_played_tracks
 
@@ -263,20 +276,27 @@ def main():
     # Get the playlist requirements.
     spotify_data = get_spotify_data()
     playlist_date = generate_playlist_date()
-    playlist_name = generate_playlist_name(playlist_date=playlist_date,
-                                           month_format=args.month_format)
+    playlist_name = generate_playlist_name(
+        playlist_date=playlist_date,
+        month_format=args.month_format)
 
     # Stop the script if the playlist already exists.
-    check_if_playlist_exists(playlist_name=playlist_name,
-                             spotify_data=spotify_data,
-                             duplicates_allowed=args.duplicates_allowed)
+    check_if_playlist_exists(
+        playlist_name=playlist_name,
+        spotify_data=spotify_data,
+        duplicates_allowed=args.duplicates_allowed)
 
-    # Generate the playlist with the user's most played tracks.
-    most_played_tracks = get_most_played_tracks(spotify_data=spotify_data)
-    generate_playlist(tracks=most_played_tracks,
-                      spotify_data=spotify_data,
-                      playlist_date=playlist_date,
-                      month_format=args.month_format)
+    # Get the user's recently most played tracks.
+    most_played_tracks = get_most_played_tracks(
+        spotify_data=spotify_data,
+        tracks_total=args.tracks_total)
+
+    # Generate a playlist with the supplied items.
+    generate_playlist(
+        tracks=most_played_tracks,
+        spotify_data=spotify_data,
+        playlist_date=playlist_date,
+        month_format=args.month_format)
 
 
 # Run if called directly.

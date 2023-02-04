@@ -36,7 +36,7 @@ class mock_SpotifyClient():
     def current_user_playlists(self):
         return {'items': [{'name': 'existing_playlist'}]}
     def current_user_top_tracks(self, time_range, limit):
-        return {'items': [{'uri': 'track_id'}]}
+        return {'items': [{'uri': 'track_id'}] * limit}
     def user_playlists(self, user):
         return {'items': [{'id': 'playlist_id'}]}
     def user_playlist_create(self, user, name, public, description):
@@ -199,13 +199,48 @@ def test_get_most_played_tracks_no_data():
     assert str(expected_error.value) == 'No Spotify data supplied!'
 
 
-# Test the function returns a list of equal or less length than supplied limit.
+# Test the function returns a list of tracks.
 def test_get_most_played_tracks_from_data():
     spotify_data = mock_SpotifyOAuth().client
-    limit = 50
-    most_played_tracks = get_most_played_tracks(spotify_data=spotify_data, limit=limit)
+    most_played_tracks = get_most_played_tracks(
+        spotify_data=spotify_data)
     assert type(most_played_tracks) is list
-    assert len(most_played_tracks) <= limit
+
+
+# Test the function requests and receives 25 tracks.
+def test_get_most_played_tracks_25_tracks():
+    spotify_data = mock_SpotifyOAuth().client
+    tracks_total = 25
+    most_played_tracks = get_most_played_tracks(
+        spotify_data=spotify_data,
+        tracks_total=tracks_total)
+    assert len(most_played_tracks) == tracks_total
+
+
+# Test the function requests and receives 50 tracks.
+def test_get_most_played_tracks_50_tracks():
+    spotify_data = mock_SpotifyOAuth().client
+    tracks_total = 50
+    most_played_tracks = get_most_played_tracks(
+        spotify_data=spotify_data,
+        tracks_total=tracks_total)
+    assert len(most_played_tracks) == tracks_total
+
+
+# Test the function defaults to using 50 tracks if an invalid value is supplied.
+def test_get_most_played_tracks_100_tracks(capfd):
+    spotify_data = mock_SpotifyOAuth().client
+    tracks_total = 100
+    most_played_tracks = get_most_played_tracks(
+        spotify_data=spotify_data,
+        tracks_total=tracks_total)
+    assert len(most_played_tracks) == 50
+
+    # Pytest provided 'capfd' allows capturing console prints.
+    output, error = capfd.readouterr()
+    assert output == ('An invalid number of tracks has been requested!\n' +
+                      'Switched to the default request of 50 tracks.\n')
+    assert error == ''
     
 
 
