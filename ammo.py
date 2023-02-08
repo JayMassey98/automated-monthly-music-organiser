@@ -103,45 +103,28 @@ def get_spotify_data():
     return spotify_data
 
 
-def generate_playlist_date(todays_date=None):
-    """Generate the date of the playlist being created.
-
-    Args:
-        todays_date: The date that the function is being run for.
-
-    Returns:
-        playlist_date: The date of the playlist that is being created.
-    """
-
-    # Determine the current date.
-    if not todays_date:
-        todays_date = date.today()
-    month = todays_date.month
-    year = todays_date.year
-
-    # Use the above to calculate the playlist's start date and name.
-    if month == 1:
-        playlist_date = todays_date.replace(year=year-1, month=12)
-    else:
-        playlist_date = todays_date.replace(month=month-1)
-
-    return playlist_date
-
-
-def generate_playlist_name(playlist_date=None, month_format='short'):
+def generate_playlist_name(ending_date=None, month_format='short'):
     """Generate the name of a playlist based on the date supplied.
 
     Args:
-        playlist_date: The date of the playlist that is being created.
+        ending_date: The end date that the function is being run for.
         month_format: A string that chooses how to display the month.
 
     Returns:
-        A string representing the name of the playlist.
+        playlist_name: A string that is a month prior to ending_date.
     """
 
-    # Catch the case where no playlist date is supplied.
-    if not playlist_date:
-        raise ValueError('No playlist date supplied!')
+    # Determine the current date.
+    if not ending_date:
+        ending_date = date.today()
+    month = ending_date.month
+    year = ending_date.year
+
+    # Use the above to calculate the playlist's start date and name.
+    if month == 1:
+        playlist_date = ending_date.replace(year=year-1, month=12)
+    else:
+        playlist_date = ending_date.replace(month=month-1)
 
     # Choose which format is used for name generation.
     if month_format == 'short':
@@ -209,14 +192,14 @@ def get_most_played_tracks(spotify_data=None, tracks_total=50):
 
 
 def generate_spotify_playlist(tracks=None, spotify_data=None,
-                              playlist_date=None, month_format='short',
+                              ending_date=None, month_format='short',
                               playlist_public=True):
     """Create a Spotify playlist of the user's currently most played tracks.
 
     Args:
         tracks: A list of the user's currently most played tracks on Spotify.
         spotify_data: A Spotify object containing the user's Spotify data.
-        playlist_date: The date of the playlist that is being created.
+        ending_date: The end date that the function is being run for.
         title_format: A string determining the playlist's title format.
     """
 
@@ -228,8 +211,8 @@ def generate_spotify_playlist(tracks=None, spotify_data=None,
     if not spotify_data:
         raise ValueError('No Spotify data supplied!')
 
-    # Catch the case where no playlist date is supplied.
-    playlist_date = playlist_date or generate_playlist_date()
+    # Catch the case where no ending date is supplied.
+    ending_date = ending_date or date.today()
 
     # Determine the start of the playlist's description.
     tracks_total = len(tracks)
@@ -240,10 +223,10 @@ def generate_spotify_playlist(tracks=None, spotify_data=None,
 
     # Get playlist name formats (both are required).
     name_short = generate_playlist_name(
-        playlist_date=playlist_date,
+        ending_date=ending_date,
         month_format='short')
     name_long = generate_playlist_name(
-        playlist_date=playlist_date,
+        ending_date=ending_date,
         month_format='long')
 
     # Determine the description's name format.

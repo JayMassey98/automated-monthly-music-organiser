@@ -109,27 +109,24 @@ def test_set_environment_variables_none_set(monkeypatch):
 
 # Test generating the playlist name when the current month is January.
 def test_generate_playlist_name_for_january():
-    mock_date = date(2023, 1, 1)
-    mock_playlist_date = mock_date.replace(year=2022, month=12)
-    expected_playlist_name = mock_date.replace(year=2022, month=12).strftime('%b %Y')
-    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_format = 'short')
+    ending_date = date(2023, 1, 1)
+    playlist_date = ending_date.replace(year=2022, month=12)
+    expected_playlist_name = playlist_date.replace(year=2022, month=12).strftime('%b %Y')
+    generated_playlist_name = generate_playlist_name(ending_date=ending_date, month_format = 'short')
     assert generated_playlist_name == expected_playlist_name
 
 
 # Test generating the playlist name when the current month is not January.
 def test_generate_playlist_name_not_january(month=2):
-    mock_date = date(2023, month, 1)
-    mock_playlist_date = mock_date.replace(month=month-1)
-    expected_playlist_name = mock_date.replace(month=month-1).strftime('%b %Y')
-    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_format = 'short')
+    ending_date = date(2023, month, 1)
+    playlist_date = ending_date.replace(month=month-1)
+    expected_playlist_name = playlist_date.replace(month=month-1).strftime('%b %Y')
+    generated_playlist_name = generate_playlist_name(ending_date=ending_date, month_format = 'short')
     assert generated_playlist_name == expected_playlist_name
 
 
 # Test generating the playlist name for all months in the year.
 def test_generate_playlist_name_all_months():
-
-    # Generate a playlist date first.
-    generate_playlist_date()
 
     # Test once for each month in the year.
     test_generate_playlist_name_for_january()
@@ -139,10 +136,10 @@ def test_generate_playlist_name_all_months():
 
 # Test generating the playlist name without any abbreviation.
 def test_generate_playlist_name_long_format(month=2):
-    mock_date = date(2023, month, 1)
-    mock_playlist_date = mock_date.replace(month=month-1)
-    expected_playlist_name = mock_date.replace(month=month-1).strftime('%B %Y')
-    generated_playlist_name = generate_playlist_name(playlist_date=mock_playlist_date, month_format = 'long')
+    ending_date = date(2023, month, 1)
+    playlist_date = ending_date.replace(month=month-1)
+    expected_playlist_name = playlist_date.replace(month=month-1).strftime('%B %Y')
+    generated_playlist_name = generate_playlist_name(ending_date=ending_date, month_format = 'long')
     assert generated_playlist_name == expected_playlist_name
 
 
@@ -271,10 +268,10 @@ def test_generate_spotify_playlist_from_data():
     # Create mock inputs.
     tracks = ['song_1', 'song_2', 'song_3']
     spotify_data = mock_SpotifyOAuth().client
-    playlist_date = date(2023, 2, 1)
+    ending_date = date(2023, 2, 1)
 
     # Test the function can be called.
     generate_spotify_playlist(
         tracks=tracks,
         spotify_data=spotify_data,
-        playlist_date=playlist_date)
+        ending_date=ending_date)
