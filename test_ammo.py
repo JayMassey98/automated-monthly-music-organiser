@@ -14,6 +14,7 @@ References:
 
 # Built-In Libraries
 from datetime import date
+import sys
 
 # External Libraries
 from ammo import *
@@ -275,3 +276,25 @@ def test_generate_spotify_playlist_from_data():
         tracks=tracks,
         spotify_data=spotify_data,
         ending_date=ending_date)
+
+
+
+# ---------
+# test_main
+# ---------
+
+
+# Test ammo.py can be run from start to finish.
+def test_main_start_to_finish_is_successful():
+
+    # Back up the real system arguments.
+    sys_argv_bak = sys.argv
+
+    # Ensure that the script can always create playlists.
+    sys.argv = ['ammo.py', '--duplicates_allowed', 'True']
+
+    # Test the script works.
+    assert main() == None
+
+    # Reinstate the arguments.
+    sys.argv = sys_argv_bak

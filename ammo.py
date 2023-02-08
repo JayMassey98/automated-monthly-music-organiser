@@ -19,6 +19,7 @@ from datetime import date
 import os
 
 # External Libraries
+import requests
 import spotipy
 from spotipy import SpotifyOAuth
 
@@ -269,9 +270,7 @@ def main():
         
     # Get the playlist requirements.
     spotify_data = get_spotify_data()
-    playlist_date = generate_playlist_date()
     playlist_name = generate_playlist_name(
-        playlist_date=playlist_date,
         month_format=args.month_format)
 
     # Stop the script if the playlist already exists.
@@ -289,7 +288,6 @@ def main():
     generate_spotify_playlist(
         tracks=most_played_tracks,
         spotify_data=spotify_data,
-        playlist_date=playlist_date,
         month_format=args.month_format,
         playlist_public=args.playlist_public)
 

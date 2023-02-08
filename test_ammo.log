@@ -1,23 +1,30 @@
 ============================= test session starts =============================
-collecting ... collected 18 items
+collecting ... collected 19 items
 
 ..\test_ammo.py::test_set_environment_variables_all_set PASSED           [  5%]
-..\test_ammo.py::test_set_environment_variables_none_set PASSED          [ 11%]
-..\test_ammo.py::test_generate_playlist_name_for_january PASSED          [ 16%]
-..\test_ammo.py::test_generate_playlist_name_not_january PASSED          [ 22%]
-..\test_ammo.py::test_generate_playlist_name_all_months PASSED           [ 27%]
-..\test_ammo.py::test_generate_playlist_name_long_format PASSED          [ 33%]
-..\test_ammo.py::test_check_if_playlist_exists_no_data PASSED            [ 38%]
-..\test_ammo.py::test_check_if_playlist_exists_is_true PASSED            [ 44%]
-..\test_ammo.py::test_check_if_playlist_exists_is_false PASSED           [ 50%]
-..\test_ammo.py::test_check_if_playlist_exists_allowed PASSED            [ 55%]
-..\test_ammo.py::test_get_most_played_tracks_no_data PASSED              [ 61%]
-..\test_ammo.py::test_get_most_played_tracks_from_data PASSED            [ 66%]
-..\test_ammo.py::test_get_most_played_tracks_25_tracks PASSED            [ 72%]
-..\test_ammo.py::test_get_most_played_tracks_50_tracks PASSED            [ 77%]
-..\test_ammo.py::test_get_most_played_tracks_100_tracks PASSED           [ 83%]
-..\test_ammo.py::test_generate_spotify_playlist_no_tracks PASSED         [ 88%]
-..\test_ammo.py::test_generate_spotify_playlist_no_data PASSED           [ 94%]
-..\test_ammo.py::test_generate_spotify_playlist_from_data PASSED         [100%]
+..\test_ammo.py::test_set_environment_variables_none_set PASSED          [ 10%]
+..\test_ammo.py::test_generate_playlist_name_for_january PASSED          [ 15%]
+..\test_ammo.py::test_generate_playlist_name_not_january PASSED          [ 21%]
+..\test_ammo.py::test_generate_playlist_name_all_months PASSED           [ 26%]
+..\test_ammo.py::test_generate_playlist_name_long_format PASSED          [ 31%]
+..\test_ammo.py::test_check_if_playlist_exists_no_data PASSED            [ 36%]
+..\test_ammo.py::test_check_if_playlist_exists_is_true PASSED            [ 42%]
+..\test_ammo.py::test_check_if_playlist_exists_is_false PASSED           [ 47%]
+..\test_ammo.py::test_check_if_playlist_exists_allowed PASSED            [ 52%]
+..\test_ammo.py::test_get_most_played_tracks_no_data PASSED              [ 57%]
+..\test_ammo.py::test_get_most_played_tracks_from_data PASSED            [ 63%]
+..\test_ammo.py::test_get_most_played_tracks_25_tracks PASSED            [ 68%]
+..\test_ammo.py::test_get_most_played_tracks_50_tracks PASSED            [ 73%]
+..\test_ammo.py::test_get_most_played_tracks_100_tracks PASSED           [ 78%]
+..\test_ammo.py::test_generate_spotify_playlist_no_tracks PASSED         [ 84%]
+..\test_ammo.py::test_generate_spotify_playlist_no_data PASSED           [ 89%]
+..\test_ammo.py::test_generate_spotify_playlist_from_data PASSED         [ 94%]
+..\test_ammo.py::test_main_start_to_finish_is_successful PASSED          [100%]
 
-============================= 18 passed in 0.15s ==============================
+============================== warnings summary ===============================
+test_ammo.py::test_main_start_to_finish_is_successful
+  C:\Users\masse\Documents\Projects\code\Python\automated-monthly-music-organiser\env\lib\site-packages\spotipy\client.py:829: DeprecationWarning: You should use `playlist_add_items(playlist_id, tracks)` instead
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 19 passed, 1 warning in 0.93s ========================
