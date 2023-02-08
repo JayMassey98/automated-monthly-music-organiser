@@ -17,6 +17,7 @@ References:
 import argparse
 from datetime import date
 import os
+import sys
 
 # External Libraries
 import requests
@@ -86,6 +87,53 @@ def get_optional_arguments():
     args = parser.parse_args()
 
     return args
+
+
+def check_connection(url):
+    """Check if a supplied URL is reachable. If the URL cannot be reached, then
+    the resulting error description will be printed and the script will halt.
+
+    Args:
+        url: The URL that will attempt to be reached.
+    """
+    
+    # A dictionary to map status codes to their descriptions or boolean values.
+    status_codes = {
+        200: True,  # OK: The request was successful.
+        201: True,  # Created: The request was successful and a resource was created.
+        204: True,  # No Content: The request was successful but there is no representation to return.
+        400: 'Bad Request: The request could not be understood or was missing required parameters.',
+        401: 'Unauthorized: Authentication failed or user does not have permissions for the requested operation.',
+        403: 'Forbidden: Authentication succeeded, but the authenticated user does not have access to the requested resource.',
+        404: 'Not Found: The requested resource could not be found.',
+        429: 'Too Many Requests: The user has sent too many requests in a given amount of time.',
+        500: 'Internal Server Error: An error occurred on the server.',
+        502: 'Bad Gateway: The server was acting as a gateway or proxy and received an invalid response from the upstream server.',
+        503: 'Service Unavailable: The server is currently unavailable (because it is overloaded or down for maintenance).'
+    }
+
+    # Try to make a GET request to the URL.
+    try:
+        
+        # Get the description for the status code.
+        response = requests.get(url)
+        status = status_codes.get(response.status_code)
+
+        # If there is no description, tell the user and return.
+        if status == True:
+            print('Connected to ' + url + '.')
+            return
+
+        # If the status is a string, print the string.
+        if isinstance(status, str):
+            print(status)
+
+    # Catch any exceptions that might occur while making the GET request.
+    except requests.exceptions.RequestException:
+        print('Error: An unknown error occurred when attempting to reach ' + url + '.')
+
+    # No connection found; exit the script.
+    sys.exit(1)
 
 
 def get_spotify_data():
@@ -267,6 +315,9 @@ def main():
     # Perform required setup.
     set_environment_variables()
     args = get_optional_arguments()
+
+    # Ensure the required Spotify API can be reached.
+    check_connection(url='https://api.spotify.com')
         
     # Get the playlist requirements.
     spotify_data = get_spotify_data()

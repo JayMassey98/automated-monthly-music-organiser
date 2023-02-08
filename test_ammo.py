@@ -103,6 +103,41 @@ def test_set_environment_variables_none_set(monkeypatch):
 
 
 
+# ---------------------
+# test_check_connection
+# ---------------------
+
+
+# Test nothing happens if the received URL status code is 400.
+def test_check_connection_returned_400_code(capfd):
+    
+    # Assert a connection can be established.
+    url = 'https://api.spotify.com'
+    assert check_connection(url) == None
+
+    # Pytest provided 'capfd' allows capturing console prints.
+    output, error = capfd.readouterr()
+    assert output == ('Connected to https://api.spotify.com.\n')
+    assert error == ''
+
+
+# Test the script stops if a non-400 status code is received.
+def test_check_connection_unknown_error_code(capfd):
+    
+    # Assert a connection cannot be established.
+    url = 'error'
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        check_connection(url)
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 1
+
+    # Pytest provided 'capfd' allows capturing console prints.
+    output, error = capfd.readouterr()
+    assert output == ('Error: An unknown error occurred when attempting to reach error.\n')
+    assert error == '' # No system error here, as the resulting behavior above is expected.
+
+
+
 # ---------------------------
 # test_generate_playlist_name
 # ---------------------------
