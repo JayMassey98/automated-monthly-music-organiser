@@ -23,4 +23,4 @@ collecting ... collected 21 items
 ..\test_ammo.py::test_generate_spotify_playlist_from_data PASSED         [ 95%]
 ..\test_ammo.py::test_main_start_to_finish_is_successful PASSED          [100%]
 
-============================= 21 passed in 0.37s ==============================
+============================= 21 passed in 1.18s ==============================

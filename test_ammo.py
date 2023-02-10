@@ -19,8 +19,6 @@ import sys
 # External Libraries
 from ammo import *
 import pytest
-import spotipy
-from spotipy import SpotifyOAuth
 
 
 
@@ -43,7 +41,7 @@ class mock_SpotifyClient():
         return {'items': [{'id': 'playlist_id'}]}
     def user_playlist_create(self, user, name, public, description):
         return {'id': 'new_playlist_id'}
-    def user_playlist_add_tracks(self, user, playlist_id, tracks):
+    def playlist_add_items(self, playlist_id, items):
         pass
 
 

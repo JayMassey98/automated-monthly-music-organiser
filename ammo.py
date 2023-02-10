@@ -97,7 +97,7 @@ def check_connection(url):
         url: The URL that will attempt to be reached.
     """
     
-    # A dictionary to map status codes to their descriptions or boolean values.
+    # Map status codes to their corresponding descriptions or boolean values.
     status_codes = {
         200: True,  # OK: The request was successful.
         201: True,  # Created: The request was successful and a resource was created.
@@ -292,19 +292,17 @@ def generate_spotify_playlist(tracks=None, spotify_data=None,
                    + ' for more information.')
     
     # Generate the playlist and obtain its resulting ID.
-    user = spotify_data.current_user()['id']
     playlist_id = spotify_data.user_playlist_create(
-        user=user,
+        user=spotify_data.current_user()['id'],
         name=name_for_title,
         public=playlist_public,
         description=description
         )['id']
 
-    # Add the supplied tracks to the generated playlist.
-    spotify_data.user_playlist_add_tracks(
-        user=user,
+    # Add the tracks to the playlist.
+    spotify_data.playlist_add_items(
         playlist_id=playlist_id,
-        tracks=tracks)
+        items=tracks)
 
 
 def main():
