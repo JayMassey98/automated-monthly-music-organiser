@@ -21,7 +21,6 @@ from ammo import *
 import pytest
 
 
-
 # -----------------
 # Spotify API Mocks
 # -----------------
@@ -50,6 +49,17 @@ class mock_SpotifyOAuth(mock_SpotifyClient):
     def __init__(self, *args, **kwargs):
         self.client = mock_SpotifyClient()
         self._session = None
+
+
+# Create a mock Spotipy class to emulate Spotify API functionality.
+class mock_spotipy():
+    def Spotify(auth_manager=None):
+        return mock_SpotifyOAuth(mock_SpotifyClient)
+
+
+# Mock the Spotipy library.
+monkeypatch = pytest.MonkeyPatch()
+monkeypatch.setattr('ammo.spotipy', mock_spotipy)
 
 
 
@@ -317,7 +327,7 @@ def test_generate_spotify_playlist_from_data():
 # ---------
 
 
-# Test ammo.py can be run from start to finish.
+# Test all of ammo.py can run in its entirety.
 def test_main_start_to_finish_is_successful():
 
     # Back up the real system arguments.
