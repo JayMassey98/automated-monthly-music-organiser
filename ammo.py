@@ -317,7 +317,7 @@ def main():
     containing the user's most played songs on Spotify within the past month.
     """
 
-    # Output the title of the script inside the console.
+    # Output the title of the script into the console.
     print('Automated Monthly Music Organiser (AMMO)\n')
 
     # Perform required setup.

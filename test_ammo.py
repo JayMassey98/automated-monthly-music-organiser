@@ -332,17 +332,20 @@ def test_generate_spotify_playlist_from_data():
 # Test all of ammo.py can run in its entirety.
 def test_main_start_to_finish_is_successful(capsys):
     
+    # Allow conftest.py access to the output.
+    global main_console_output
+    main_console_output = capsys.readouterr()
+    
     # Back up the real system arguments.
     sys_argv_bak = sys.argv
 
     # Ensure that the script can always create playlists.
     sys.argv = ['ammo.py', '--duplicates_allowed', 'True']
     
-    # Test the script works.
-    assert main() == None
+    # Run the script.
+    main()
 
-    # Allow conftest.py access.
-    global main_console_output
+    # Update the result of the console output.
     main_console_output = capsys.readouterr()
 
     # Reinstate the arguments.
