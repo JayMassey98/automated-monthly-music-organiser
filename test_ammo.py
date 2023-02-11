@@ -2,19 +2,16 @@
 a Spotify playlist containing a user's most played songs of the previous month.
 
 Usage:
-    cmd /c "pytest -v --no-header ../test_ammo.py & pytest -v --no-header
-    ../test_ammo.py > ../test_ammo.log"
+    cmd /c 'pytest -v --no-header ../test_ammo.py & pytest -v --no-header
+    ../test_ammo.py > ../test_ammo.log'
 
 Outline:
     Runs through each function, testing various possible cases for each.
 
 References:
-    See https://developer.spotify.com/documentation/web-api/ for API info.
+    https://docs.pytest.org/en/7.2.x/reference/ for Pytest (Version 7.2) info.
+    https://developer.spotify.com/documentation/web-api/ for Spotify API info.
 """
-
-# Built-In Libraries
-from datetime import date
-import sys
 
 # External Libraries
 from ammo import *
@@ -37,14 +34,14 @@ class mock_SpotifyClient():
     def current_user_top_tracks(self, time_range, limit):
         return {'items': [{'uri': 'track_id'}] * limit}
     def user_playlists(self, user):
-        return {'items': [{'id': 'playlist_id'}]}
+        return {'items': [{'id': 'mock_playlist_uri_code'}]}
     def user_playlist_create(self, user, name, public, description):
-        return {'id': 'new_playlist_id'}
+        return {'id': 'mock_playlist_uri_code'}
     def playlist_add_items(self, playlist_id, items):
         pass
 
 
-# Create a mock SpotifyOAuth class that returns a mock Spotify client.
+# Create a mock SpotifyOAuth class that uses a mock Spotify client.
 class mock_SpotifyOAuth(mock_SpotifyClient):
     def __init__(self, *args, **kwargs):
         self.client = mock_SpotifyClient()
@@ -55,6 +52,8 @@ class mock_SpotifyOAuth(mock_SpotifyClient):
 class mock_spotipy():
     def Spotify(auth_manager=None):
         return mock_SpotifyOAuth(mock_SpotifyClient)
+    class SpotifyOAuth(mock_SpotifyOAuth):
+        pass
 
 
 # Mock the Spotipy library.
@@ -72,9 +71,9 @@ monkeypatch.setattr('ammo.spotipy', mock_spotipy)
 def test_set_environment_variables_all_set(monkeypatch):
 
     # Set the environment variables before running the function below.
-    monkeypatch.setenv("SPOTIPY_CLIENT_ID", 'test_client_id')
-    monkeypatch.setenv("SPOTIPY_CLIENT_SECRET", 'test_client_secret')
-    monkeypatch.setenv("SPOTIPY_REDIRECT_URI", 'test_redirect_uri')
+    monkeypatch.setenv('SPOTIPY_CLIENT_ID', 'test_client_id')
+    monkeypatch.setenv('SPOTIPY_CLIENT_SECRET', 'test_client_secret')
+    monkeypatch.setenv('SPOTIPY_REDIRECT_URI', 'test_redirect_uri')
     set_environment_variables()
 
     # Assert that the environment variables above are set correctly.
@@ -87,18 +86,18 @@ def test_set_environment_variables_all_set(monkeypatch):
 def test_set_environment_variables_none_set(monkeypatch):
 
     # Delete the environment variables without raising errors.
-    monkeypatch.delenv("SPOTIPY_CLIENT_ID", raising=False)
-    monkeypatch.delenv("SPOTIPY_CLIENT_SECRET", raising=False)
-    monkeypatch.delenv("SPOTIPY_REDIRECT_URI", raising=False)
+    monkeypatch.delenv('SPOTIPY_CLIENT_ID', raising=False)
+    monkeypatch.delenv('SPOTIPY_CLIENT_SECRET', raising=False)
+    monkeypatch.delenv('SPOTIPY_REDIRECT_URI', raising=False)
     
     # Mock a user's input.
     def mock_input(prompt):
-        if prompt == "Client ID: ":
-            return "test_client_id"
-        elif prompt == "Client Secret: ":
-            return "test_client_secret"
-        elif prompt == "Redirect URI: ":
-            return "test_redirect_uri"
+        if prompt == 'Client ID: ':
+            return 'test_client_id'
+        elif prompt == 'Client Secret: ':
+            return 'test_client_secret'
+        elif prompt == 'Redirect URI: ':
+            return 'test_redirect_uri'
 
     # Mock the required user inputs via monkey-patching.
     monkeypatch.setattr('builtins.input', mock_input)
@@ -125,7 +124,7 @@ def test_check_connection_returned_400_code(capfd):
 
     # Pytest provided 'capfd' allows capturing console prints.
     output, error = capfd.readouterr()
-    assert output == ('Connected to https://api.spotify.com.\n')
+    assert output == ('Secured a https://api.spotify.com link.\n')
     assert error == ''
 
 
@@ -205,7 +204,7 @@ def test_check_if_playlist_exists_is_true():
     spotify_data = mock_SpotifyOAuth().client
     with pytest.raises(ValueError) as expected_error:
         check_if_playlist_exists(playlist_name='existing_playlist', spotify_data=spotify_data)
-    assert str(expected_error.value) == 'A playlist called existing_playlist already exists!'
+    assert str(expected_error.value) == 'existing_playlist found on Spotify!'
 
 
 # Test the function does not raise an exception when the playlist does not already exist.
@@ -224,9 +223,10 @@ def test_check_if_playlist_exists_allowed(capfd):
 
     # Pytest provided 'capfd' allows capturing console prints.
     output, error = capfd.readouterr()
-    assert output == ('A playlist called existing_playlist already exists!\n' +
-                      'Creating another playlist called existing_playlist.\n')
+    assert output == ('\nWarning: existing_playlist found on Spotify!\n' +
+                      'Creating another existing_playlist playlist.\n\n')
     assert error == ''
+
 
 
 # ---------------------------
@@ -281,7 +281,9 @@ def test_get_most_played_tracks_100_tracks(capfd):
     # Pytest provided 'capfd' allows capturing console prints.
     output, error = capfd.readouterr()
     assert output == ('An invalid number of tracks has been requested!\n' +
-                      'Switched to the default request of 50 tracks.\n')
+                      'Switched to the default request of 50 tracks.\n' +
+                      'A total of 50 songs have been selected.\n')
+ 
     assert error == ''
     
 
@@ -328,16 +330,20 @@ def test_generate_spotify_playlist_from_data():
 
 
 # Test all of ammo.py can run in its entirety.
-def test_main_start_to_finish_is_successful():
-
+def test_main_start_to_finish_is_successful(capsys):
+    
     # Back up the real system arguments.
     sys_argv_bak = sys.argv
 
     # Ensure that the script can always create playlists.
     sys.argv = ['ammo.py', '--duplicates_allowed', 'True']
-
+    
     # Test the script works.
     assert main() == None
+
+    # Allow conftest.py access.
+    global main_console_output
+    main_console_output = capsys.readouterr()
 
     # Reinstate the arguments.
     sys.argv = sys_argv_bak

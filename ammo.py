@@ -10,7 +10,7 @@ Outline:
     one is generated with the user's most played songs from the previous month.
 
 References:
-    See https://developer.spotify.com/documentation/web-api/ for API info.
+    https://developer.spotify.com/documentation/web-api/ for Spotify API info.
 """
 
 # Built-In Libraries
@@ -22,7 +22,6 @@ import sys
 # External Libraries
 import requests
 import spotipy
-from spotipy import SpotifyOAuth
 
 
 def set_environment_variables():
@@ -30,9 +29,9 @@ def set_environment_variables():
     
     # All the required Spotipy environment variables.
     environment_variables = {
-        "SPOTIPY_CLIENT_ID": "Client ID: ",
-        "SPOTIPY_CLIENT_SECRET": "Client Secret: ",
-        "SPOTIPY_REDIRECT_URI": "Redirect URI: "
+        'SPOTIPY_CLIENT_ID': 'Client ID: ',
+        'SPOTIPY_CLIENT_SECRET': 'Client Secret: ',
+        'SPOTIPY_REDIRECT_URI': 'Redirect URI: '
     }
     
     # Ensure all the Spotipy environment variables are set.
@@ -121,7 +120,7 @@ def check_connection(url):
 
         # If there is no description, tell the user and return.
         if status == True:
-            print('Connected to ' + url + '.')
+            print('Secured a ' + url + ' link.')
             return
 
         # If the status is a string, print the string.
@@ -143,10 +142,10 @@ def get_spotify_data():
         spotify_data: A Spotify object containing a user's Spotify data.
     """
 
-    # Provide the required authentication scopes for requesting Spotify data.
-    auth_manager = SpotifyOAuth(scope='user-top-read '
-                                + 'playlist-modify-public '
-                                + 'playlist-modify-private')
+    # Provide the required authentication for requesting Spotify data.
+    auth_manager = spotipy.SpotifyOAuth(scope='user-top-read '
+                                        + 'playlist-modify-public '
+                                        + 'playlist-modify-private')
     spotify_data = spotipy.Spotify(auth_manager=auth_manager)
 
     return spotify_data
@@ -203,10 +202,10 @@ def check_if_playlist_exists(playlist_name='', spotify_data=None,
 
     # Determine if a playlist should be made.
     if playlist_name in existing_playlists:
-        exist_output = f'A playlist called {playlist_name} already exists!'
+        exist_output = f'{playlist_name} found on Spotify!'
         if duplicates_allowed:
-            print(exist_output +
-                  f'\nCreating another playlist called {playlist_name}.')
+            print('\nWarning: ' + exist_output +
+                  f'\nCreating another {playlist_name} playlist.\n')
         else:
             raise ValueError(exist_output)
 
@@ -237,6 +236,9 @@ def get_most_played_tracks(spotify_data=None, tracks_total=50):
                          current_user_top_tracks(time_range='short_term',
                                                  limit=tracks_total)['items']]
 
+    # The number of tracks returned could be less than the requested total.
+    print('A total of', len(most_played_tracks), 'songs have been selected.')
+    
     return most_played_tracks
 
 
@@ -281,13 +283,15 @@ def generate_spotify_playlist(tracks=None, spotify_data=None,
     # Determine the description's name format.
     if month_format == 'short':
         name_for_title = name_short
+        print('The month will be titled in short form.')
     else:
         name_for_title = name_long
+        print('The month will be titled in long form.')
 
     # Generate the description for the playlist.
     description = (description
                    + name_long
-                   + '. Auto-generated with A.M.M.O. Visit '
+                   + '. Auto-generated with AMMO. Visit '
                    + 'https://github.com/JayMassey98'
                    + ' for more information.')
     
@@ -298,17 +302,23 @@ def generate_spotify_playlist(tracks=None, spotify_data=None,
         public=playlist_public,
         description=description
         )['id']
+    print('Generating a playlist for ' + name_long + '.')
 
     # Add the tracks to the playlist.
     spotify_data.playlist_add_items(
         playlist_id=playlist_id,
         items=tracks)
+    print('\nPlaylist successfully pushed to Spotify:')
+    print('spotify:playlist:' + playlist_id)
 
 
 def main():
     """The entry point for this script, which will generate a Spotify playlist
     containing the user's most played songs on Spotify within the past month.
     """
+
+    # Output the title of the script inside the console.
+    print('Automated Monthly Music Organiser (AMMO)\n')
 
     # Perform required setup.
     set_environment_variables()
