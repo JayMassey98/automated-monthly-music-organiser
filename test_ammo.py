@@ -15,51 +15,8 @@ References:
 
 # External Libraries
 from ammo import *
+from mock_ammo import *
 import pytest
-
-
-# -----------------
-# Spotify API Mocks
-# -----------------
-
-
-# Create a mock Spotify client containing various playlist functions.
-class mock_SpotifyClient():
-    def user(self):
-        return 'mock_user'
-    def current_user(self):
-        return {'id': 'user_id'}
-    def current_user_playlists(self):
-        return {'items': [{'name': 'existing_playlist'}]}
-    def current_user_top_tracks(self, time_range, limit):
-        return {'items': [{'uri': 'track_id'}] * limit}
-    def user_playlists(self, user):
-        return {'items': [{'id': 'mock_playlist_uri_code'}]}
-    def user_playlist_create(self, user, name, public, description):
-        return {'id': 'mock_playlist_uri_code'}
-    def playlist_add_items(self, playlist_id, items):
-        pass
-
-
-# Create a mock SpotifyOAuth class that uses a mock Spotify client.
-class mock_SpotifyOAuth(mock_SpotifyClient):
-    def __init__(self, *args, **kwargs):
-        self.client = mock_SpotifyClient()
-        self._session = None
-
-
-# Create a mock Spotipy class to emulate Spotify API functionality.
-class mock_spotipy():
-    def Spotify(auth_manager=None):
-        return mock_SpotifyOAuth(mock_SpotifyClient)
-    class SpotifyOAuth(mock_SpotifyOAuth):
-        pass
-
-
-# Mock the Spotipy library.
-monkeypatch = pytest.MonkeyPatch()
-monkeypatch.setattr('ammo.spotipy', mock_spotipy)
-
 
 
 # --------------------------------------
@@ -219,7 +176,7 @@ def test_check_if_playlist_exists_allowed(capfd):
     spotify_data = mock_SpotifyOAuth().client
     check_if_playlist_exists(playlist_name='existing_playlist',
                              spotify_data=spotify_data,
-                             duplicates_allowed=True)
+                             copies_allowed=True)
 
     # Pytest provided 'capfd' allows capturing console prints.
     output, error = capfd.readouterr()
@@ -339,8 +296,8 @@ def test_main_start_to_finish_is_successful(capsys):
     # Back up the real system arguments.
     sys_argv_bak = sys.argv
 
-    # Ensure that the script can always create playlists.
-    sys.argv = ['ammo.py', '--duplicates_allowed', 'True']
+    # Mock all external dependencies in ammo.py.
+    sys.argv = ['ammo.py', '--dry_run', 'True']
     
     # Run the script.
     main()

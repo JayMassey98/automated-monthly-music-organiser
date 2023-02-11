@@ -20,6 +20,7 @@ import os
 import sys
 
 # External Libraries
+import mock_ammo
 import requests
 import spotipy
 
@@ -60,14 +61,19 @@ def get_optional_arguments():
 
     # Call the argparse library to handle any supplied arguments.
     parser = argparse.ArgumentParser()
+    parser.add_argument('-d',
+                        '--dry_run',
+                        help='Determines if the Spotify API should be mocked.',
+                        type=bool,
+                        default=False)
     parser.add_argument('-m',
                         '--month_format',
                         help=('Determines how months are displayed in ' +
                               'generated playlists.'),
                         type=str,
                         default='short')
-    parser.add_argument('-d',
-                        '--duplicates_allowed',
+    parser.add_argument('-c',
+                        '--copies_allowed',
                         help=('Determines if a playlist should be generated ' +
                               'if one with the same name already exists.'),
                         type=bool,
@@ -88,13 +94,19 @@ def get_optional_arguments():
     return args
 
 
-def check_connection(url):
+def check_connection(url, dry_run=False):
     """Check if a supplied URL is reachable. If the URL cannot be reached, then
     the resulting error description will be printed and the script will halt.
 
     Args:
-        url: The URL that will attempt to be reached.
+        url: The URL that the program will establish a connection with.
+        dry_run: A boolean determining if external API should be mocked.
     """
+    
+    # Don't attempt a real connection for dry runs.
+    if dry_run:
+        print('Secured a ' + url + ' link.')
+        return
     
     # Map status codes to their corresponding descriptions or boolean values.
     status_codes = {
@@ -135,18 +147,29 @@ def check_connection(url):
     sys.exit(1)
 
 
-def get_spotify_data():
+def get_spotify_data(dry_run=False):
     """Authenticate a user's Spotify credentials to allow data requests.
+    
+    Args:
+        dry_run: A boolean determining if external API should be mocked.
     
     Returns:
         spotify_data: A Spotify object containing a user's Spotify data.
     """
+    
+    # Detach Spotipy on dry runs.
+    if dry_run:
+        SpotifyOAuth = mock_ammo.mock_spotipy.SpotifyOAuth
+        Spotify = mock_ammo.mock_spotipy.Spotify
+    else:
+        SpotifyOAuth = spotipy.SpotifyOAuth
+        Spotify = spotipy.Spotify
 
-    # Provide the required authentication for requesting Spotify data.
-    auth_manager = spotipy.SpotifyOAuth(scope='user-top-read '
-                                        + 'playlist-modify-public '
-                                        + 'playlist-modify-private')
-    spotify_data = spotipy.Spotify(auth_manager=auth_manager)
+    # Supply the required scopes and retrieve the data.
+    auth_manager = SpotifyOAuth(scope='user-top-read '
+                                + 'playlist-modify-public '
+                                + 'playlist-modify-private')
+    spotify_data = Spotify(auth_manager=auth_manager)
 
     return spotify_data
 
@@ -184,7 +207,7 @@ def generate_playlist_name(ending_date=None, month_format='short'):
 
 
 def check_if_playlist_exists(playlist_name='', spotify_data=None,
-                             duplicates_allowed=False):
+                             copies_allowed=False):
     """Check if the user already has a playlist with the supplied name.
 
     Args:
@@ -203,7 +226,7 @@ def check_if_playlist_exists(playlist_name='', spotify_data=None,
     # Determine if a playlist should be made.
     if playlist_name in existing_playlists:
         exist_output = f'{playlist_name} found on Spotify!'
-        if duplicates_allowed:
+        if copies_allowed:
             print('\nWarning: ' + exist_output +
                   f'\nCreating another {playlist_name} playlist.\n')
         else:
@@ -324,11 +347,14 @@ def main():
     set_environment_variables()
     args = get_optional_arguments()
 
-    # Ensure the required Spotify API can be reached.
-    check_connection(url='https://api.spotify.com')
+    # Check the Spotify API can be reached.
+    check_connection(
+        url='https://api.spotify.com',
+        dry_run=args.dry_run)
         
     # Get the playlist requirements.
-    spotify_data = get_spotify_data()
+    spotify_data = get_spotify_data(
+        dry_run=args.dry_run)
     playlist_name = generate_playlist_name(
         month_format=args.month_format)
 
@@ -336,7 +362,7 @@ def main():
     check_if_playlist_exists(
         playlist_name=playlist_name,
         spotify_data=spotify_data,
-        duplicates_allowed=args.duplicates_allowed)
+        copies_allowed=args.copies_allowed)
 
     # Get the user's recently most played tracks.
     most_played_tracks = get_most_played_tracks(
