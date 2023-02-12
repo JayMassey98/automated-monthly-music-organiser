@@ -14,7 +14,7 @@ References:
 # ----------------
 
 
-# Create a mock Spotify client containing various playlist functions.
+# A mock Spotify client emulating API functionality.
 class mock_SpotifyClient():
     def user(self):
         return 'mock_user'
@@ -32,16 +32,12 @@ class mock_SpotifyClient():
         pass
 
 
-# Create a mock SpotifyOAuth class that uses a mock Spotify client.
+# A mock Spotify authentication for the client API.
 class mock_SpotifyOAuth(mock_SpotifyClient):
     def __init__(self, *args, **kwargs):
         self.client = mock_SpotifyClient()
-        self._session = None
 
 
-# Create a mock Spotipy class to emulate Spotify API functionality.
-class mock_spotipy():
-    def Spotify(auth_manager=None):
-        return mock_SpotifyOAuth(mock_SpotifyClient)
-    class SpotifyOAuth(mock_SpotifyOAuth):
-        pass
+# A mock Spotify entry point for the Spotipy code.
+class mock_Spotify(mock_SpotifyOAuth):
+    pass

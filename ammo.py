@@ -159,8 +159,8 @@ def get_spotify_data(dry_run=False):
     
     # Detach Spotipy on dry runs.
     if dry_run:
-        SpotifyOAuth = mock_ammo.mock_spotipy.SpotifyOAuth
-        Spotify = mock_ammo.mock_spotipy.Spotify
+        SpotifyOAuth = mock_ammo.mock_SpotifyOAuth
+        Spotify = mock_ammo.mock_Spotify
     else:
         SpotifyOAuth = spotipy.SpotifyOAuth
         Spotify = spotipy.Spotify
